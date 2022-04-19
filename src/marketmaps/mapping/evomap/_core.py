@@ -16,9 +16,8 @@ This version: May 2019.
 """
 
 import numpy as np
-import pylab
 from scipy.spatial.distance import squareform
-
+import pandas as pd
 from numba import jit
 
 EPSILON = 1e-12
@@ -796,3 +795,42 @@ def calc_weights(X_ts, n_dims, weighting_scheme):
 		Ws[:, (n_dims*t):(n_dims*t)+n_dims] = W_t
 
 	return Ws
+
+def grid_search(self, param_grid, X_ts):
+
+    if self.verbose > 0:
+        print("[EvoMDS] Evaluating parameter grid..")
+
+    def iter_grid(p):
+        items = sorted(p.items())
+        if not items:
+            yield {}
+        else:
+            keys, values = zip(*items)
+            for v in product(*values):
+                params = dict(zip(keys, v))
+                yield params
+        
+    df_res = pd.DataFrame(columns = ['alpha', 'p', 'avg_hitrate', 'misalign', 'align', 'pers'])
+    for param_combi in iter_grid(param_grid):
+        if self.verbose > 0:
+            print("[EvoMDS] .. evaluating parameter combination: " + str(param_combi))
+        model_i = copy.deepcopy(self)
+        model_i.set_params(param_combi)
+        model_i.set_params({'verbose': 0})
+        Y_ts_i = model_i.fit_transform(X_ts)
+        df_res = df_res.append({
+            'alpha': param_combi['alpha'], 
+            'p': int(param_combi['p']), 
+            'static_cost': model_i.cost_static_avg_,
+            'avg_hitrate': avg_hitrate_score(X_ts, Y_ts_i, n_neighbors= 3, input_type = dict(model_i.get_params())['input_type']),
+            'misalign': misalign_score(Y_ts_i),
+            'misalign_norm': misalign_score(Y_ts_i, normalize = True),
+            'align': align_score(Y_ts_i), 
+            'pers': persistence_score(Y_ts_i)}, ignore_index = True)
+
+    if self.verbose > 0:
+            print("[EvoMDS] Done.")
+
+
+    return df_res
