@@ -1,6 +1,6 @@
 # marketmaps
 
-A Python package for exploring markets in maps
+A Python package for exploring markets in maps!
 
 ## Installation
 
@@ -10,7 +10,17 @@ $ pip install marketmaps
 
 ## Usage
 
-- TODO
+For a quickstart on how to use `marketmaps`, run
+
+```bash
+$ jupyter notebook quickstart.ipynb
+```
+
+For a more thorough introduction (incl. how to use the dynamic mapping method 'EvoMap'), run
+
+```bash
+$ jupyter notebook tutorial.ipynb
+```
 
 ## Contributing
 

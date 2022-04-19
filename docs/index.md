@@ -5,7 +5,9 @@
 :maxdepth: 1
 :hidden:
 
-example.ipynb
+quickstart.ipynb
+static mapping.ipynb
+dynamic mapping.ipynb
 changelog.md
 contributing.md
 conduct.md
