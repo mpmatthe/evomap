@@ -1,18 +1,17 @@
 COORD_SYS_BOUND = 1e2
 from matplotlib.pyplot import step
 from numpy.lib.function_base import disp
-from sklearn.metrics.pairwise import cosine_similarity
-from evomap.core import calc_dyn_gradient
-from evomap.core import initialize_positions
-from evomap.core import build_inclusion_array
-from evomap.core import calc_weights
-from evomap.core import calc_weights_new
-from evomap.core import calc_dyn_cost
-from evomap.metrics import *
+#from sklearn.metrics.pairwise import cosine_similarity
+from ._core import calc_dyn_gradient
+from ._core import initialize_positions
+from ._core import build_inclusion_array
+from ._core import calc_weights
+from ._core import calc_weights_new
+from ._core import calc_dyn_cost
 
 from scipy.spatial.distance import cdist
 from scipy.linalg import norm
-from sklearn.isotonic import IsotonicRegression
+#from sklearn.isotonic import IsotonicRegression
 from scipy.spatial.distance import pdist, squareform
 from scipy.stats import spearmanr, pearsonr
 import itertools
@@ -254,39 +253,6 @@ class EvoMDS():
             
         return step_size
 
-
-    def _transform_distances(self, D, dis):
-        "dis: map distances, D: given distances"
-
-        n_samples = D.shape[0]
-        dis_map_flat = ((1 - np.tri(n_samples)) * D).ravel()
-        dis_map_flat_pos = dis_map_flat[dis_map_flat != 0] 
-        # 1D array of non-negative 
-        # map distances - excluding symetric duplicates
-
-        ir = IsotonicRegression()
-        dis_flat = dis.ravel()
-        # dissimilarities with 0 are considered as missing values
-        dis_flat_pos = dis_flat[dis_map_flat != 0]
-
-        # Compute the disparities using a monotonic regression
-        fitted_disparities = ir.fit_transform(dis_map_flat_pos, dis_flat_pos)
-        disparities_flat = dis_flat.copy()
-        disparities_flat[dis_map_flat != 0] = fitted_disparities
-        disparities = disparities_flat.reshape((n_samples, n_samples))
-        
-        # ----- ADDITION BY MAX: ---- Copy upper to lower
-        i_lower = np.tril_indices(n_samples, -1)
-        disparities[i_lower] = disparities.T[i_lower] 
-        # ------ END OF ADDITION ---- 
-        disparities *= np.sqrt((n_samples * (n_samples - 1) / 2) /
-                               (disparities ** 2).sum())
-
-        # OLD:
-        #disparities *= np.sqrt((n_samples * (n_samples - 1) / 2) /
-        #                       (disparities ** 2).sum())
-        
-        return disparities
 
     def _get_avg_stress(self, Xs, Ys, inclusions, return_all_periods = False):
         """[summary]

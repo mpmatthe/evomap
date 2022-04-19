@@ -18,19 +18,18 @@ from numba import jit
 import numpy as np 
 from scipy.spatial.distance import cdist
 
-from evomap.core import calc_gradient
-from evomap.core import validate_input
-from evomap.core import calc_dyn_cost
-from evomap.core import init_inclusions
-from evomap.core import build_inclusion_array
-from evomap.core import initialize_positions
-from evomap.core import calc_dyn_gradient
-from evomap.core import extend_gradient
-from evomap.core import calc_weights_new
+from ._core import calc_gradient
+from ._core import validate_input
+from ._core import calc_dyn_cost
+from ._core import init_inclusions
+from ._core import build_inclusion_array
+from ._core import initialize_positions
+from ._core import calc_dyn_gradient
+from ._core import extend_gradient
+from ._core import calc_weights_new
 
 from itertools import product
 import copy
-from evomap.util.metrics import *
 
 class Error(Exception):
     """Base class for other exceptions"""

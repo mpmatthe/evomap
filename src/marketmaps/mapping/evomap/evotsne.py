@@ -15,17 +15,16 @@ import os
 import copy
 from itertools import product 
 
-from evomap.core import calc_dyn_cost, calc_p_matrix
-from evomap.core import initialize_positions
-from evomap.core import build_inclusion_array
-from evomap.core import calc_q_matrix
-from evomap.core import calc_gradient
-from evomap.core import calc_dyn_gradient
-from evomap.core import is_valid_input
-from evomap.core import kl_divergence
-from evomap.core import calc_weights
-from evomap.core import calc_weights_new
-from evomap.metrics import *
+from ._core import calc_dyn_cost, calc_p_matrix
+from ._core import initialize_positions
+from ._core import build_inclusion_array
+from ._core import calc_q_matrix
+from ._core import calc_gradient
+from ._core import calc_dyn_gradient
+from ._core import is_valid_input
+from ._core import kl_divergence
+from ._core import calc_weights
+from ._core import calc_weights_new
 
 class Error(Exception):
     """Base class for other exceptions"""

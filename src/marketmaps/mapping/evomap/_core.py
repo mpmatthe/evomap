@@ -18,7 +18,6 @@ This version: May 2019.
 import numpy as np
 import pylab
 from scipy.spatial.distance import squareform
-from . import _utils 
 
 from numba import jit
 
@@ -180,6 +179,8 @@ def calc_p_matrix(X, included, input_type, perplexity):
 	Returns:
 		P [float] -- (n,n) array of joint-probabilites
 	"""
+	from . import _utils # Import here to avoid circular dependency when initializing the module
+
 	n = X.shape[0]
 
 	if input_type == "data":

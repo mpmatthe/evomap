@@ -12,7 +12,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import matplotlib as mpl
 from cycler import cycler
-from adjustText import adjust_text
+#from adjustText import adjust_text
 
 DEFAULT_BUBBLE_SIZE = 15
 DEFAULT_FONT_SIZE = 10
