@@ -6,7 +6,7 @@ Author: Maximilian Matthe <matthe@wiwi.uni-frankfurt.de>
 from importlib import resources
 import numpy as np
 
-def load_TNIC_testfile():
+def load_TNIC_testdata():
     """ Load example data. Original data comes from 
     https://hobergphillips.tuck.dartmouth.edu/.  
 
@@ -25,6 +25,6 @@ def load_TNIC_testfile():
     with resources.path("marketmaps.data", "labels.npy") as f:
         labels = np.load(f)
 
-    TNIC_testfile = {'matrix': sim_mat, 'labels': labels, 'cluster': cluster}
-    return TNIC_testfile
+    TNIC_testdata = {'matrix': sim_mat, 'labels': labels, 'cluster': cluster}
+    return TNIC_testdata
 
