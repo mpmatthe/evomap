@@ -182,7 +182,9 @@ def draw_map(Y, c = None, labels = None, highlight_labels = None, inclusions = N
             if labels[i] in highlight_labels:
                 p.text(df_data['x'].iloc[i], df_data['y'].iloc[i], df_data['label'].iloc[i], alpha = 1, fontdict = highlighted_fontdict)
             else:
-                p.text(df_data['x'].iloc[i], df_data['y'].iloc[i], df_data['label'].iloc[i], alpha = .6, fontdict = fontdict)
+                continue
+
+    #                p.text(df_data['x'].iloc[i], df_data['y'].iloc[i], df_data['label'].iloc[i], alpha = .6, fontdict = fontdict)
 
     for highlighted_label in highlight_labels:
         df_i = df_data.query('label == @highlighted_label')        
