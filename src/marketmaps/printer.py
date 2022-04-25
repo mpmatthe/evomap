@@ -6,6 +6,7 @@ Author: Maximilian Matthe <matthe@wiwi.uni-frankfurt.de>
 
 from multiprocessing.sharedctypes import Value
 from unittest.mock import DEFAULT
+from matplotlib.colors import ListedColormap
 import seaborn as sns
 import numpy as np
 import pandas as pd
@@ -123,8 +124,18 @@ def draw_map(Y, c = None, labels = None, highlight_labels = None, inclusions = N
     if cmap is None:
         if len(np.unique(c)) <= 10:
             cmap = "tab10"
-        elif len(np.unique(c)) <= 20:
-            cmap = "tab20"
+        elif len(np.unique(c)) <= 15:
+            cmap = mpl.cm.get_cmap('tab10')
+            hex = []
+            for i in range(10):
+                hex.append(mpl.colors.rgb2hex(cmap(i)))
+
+            hex.append('#ffff33')
+            hex.append('#b9ff66')
+            hex.append('#cdb7f6')
+
+            cmap = ListedColormap(hex) 
+
         else:
             cmap = "tab20"
             print("More than 20 clusters. Will include duplicate colors unless custom colormap is provided.")
