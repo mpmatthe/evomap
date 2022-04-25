@@ -65,7 +65,7 @@ def sim2dist(sim_mat, transformation = 'inverse', eps = 1e-3):
     elif transformation == 'mirror':
         # Normalize similarities to [0,1]
 #        sim_mat = sim_mat / (np.max(sim_mat)+eps)
-        dist_mat = np.max(sim_mat) - sim_mat
+        dist_mat = np.max(sim_mat) + eps - sim_mat
 
     np.fill_diagonal(dist_mat, 0)
     return dist_mat 
