@@ -23,7 +23,7 @@ def load_tnic_sample():
     with resources.path("marketmaps.data.tnic_sample", "cluster.npy") as f:
         cluster = np.load(f)
 
-    with resources.path("marketmaps.data.tnic_sample", "tnic_sample") as f:
+    with resources.path("marketmaps.data.tnic_sample", "labels.npy") as f:
         labels = np.load(f)
 
     TNIC_testdata = {'matrix': sim_mat, 'labels': labels, 'cluster': cluster}
