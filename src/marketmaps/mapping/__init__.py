@@ -1,4 +1,4 @@
-from .cmdscale import cmdscale
+from .cmds import CMDS
 from .evomap import EvoMDS, EvoSammon, EvoTSNE
 
-__all__ = ['cmdscale', 'EvoMDS', 'EvoSammon', 'EvoTSNE']
+__all__ = ['CMDS', 'EvoMDS', 'EvoSammon', 'EvoTSNE']
