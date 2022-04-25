@@ -118,7 +118,7 @@ def edgelist2matrix(df, score_var, id_var_i, id_var_j, time_var = None, time_sel
     S: ndarray of shape (n_samples, n_samples)
         A matrix of pairwise relationships.
 
-    ids: list
+    ids: ndarray of shape (n_samles, )
         Identifiers for each element of the matrix.
     """
 
@@ -137,7 +137,7 @@ def edgelist2matrix(df, score_var, id_var_i, id_var_j, time_var = None, time_sel
     S = coo_matrix((scores, (row, col)), shape=(n, n))
     S = S.toarray()
     S = np.nan_to_num(S, 0)
-    return S, ids
+    return S, np.array(ids)
 
 def normalize_distances(D_ts):
     """ Normalize a sequence of distance matrices by a common factor 
