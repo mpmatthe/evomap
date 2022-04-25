@@ -15,7 +15,7 @@ import matplotlib as mpl
 from cycler import cycler
 #from adjustText import adjust_text
 
-DEFAULT_BUBBLE_SIZE = 15
+DEFAULT_BUBBLE_SIZE = 25
 DEFAULT_FONT_SIZE = 10
 
 def draw_map(Y, c = None, labels = None, highlight_labels = None, inclusions = None, 
@@ -100,7 +100,9 @@ def draw_map(Y, c = None, labels = None, highlight_labels = None, inclusions = N
     if c is None:
         c = np.zeros((n_samples, 1))
     else:
-        c = np.array(c).reshape((n_samples, 1))
+        c = np.array(c)
+    c_labels = np.unique(c)
+    c = np.array([np.where(c_labels == clust)[0][0] for clust in c]).reshape((n_samples, 1))
 
     df_data = pd.DataFrame(
         data = np.hstack([Y, c]), 
@@ -183,19 +185,23 @@ def draw_map(Y, c = None, labels = None, highlight_labels = None, inclusions = N
 
             p.text(cluster_means.iloc[i][0] + shift[0],
                 cluster_means.iloc[i][1] + shift[1], 
-                clust,
+                c_labels[clust],
                 color = cmap(clust),
                 alpha = .6,fontdict = fontdict)
 
     elif annotate == 'labels' or annotate == 'points':
 
-        for i in range(len(df_data)):
-            if labels[i] in highlight_labels:
-                p.text(df_data['x'].iloc[i], df_data['y'].iloc[i], df_data['label'].iloc[i], alpha = 1, fontdict = highlighted_fontdict)
-            else:
-                continue
-
-    #                p.text(df_data['x'].iloc[i], df_data['y'].iloc[i], df_data['label'].iloc[i], alpha = .6, fontdict = fontdict)
+        if len(highlight_labels) > 0:
+            # Only print highlighted labels
+            for i in range(len(df_data)):
+                if labels[i] in highlight_labels:
+                    p.text(df_data['x'].iloc[i], df_data['y'].iloc[i], df_data['label'].iloc[i], alpha = 1, fontdict = highlighted_fontdict)
+                else:
+                    continue
+        else:
+            # Print all labels
+            for i in range(len(df_data)):
+                p.text(df_data['x'].iloc[i], df_data['y'].iloc[i], df_data['label'].iloc[i], alpha = .6, fontdict = fontdict)
 
     for highlighted_label in highlight_labels:
         df_i = df_data.query('label == @highlighted_label')        
