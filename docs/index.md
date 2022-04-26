@@ -6,6 +6,7 @@
 :hidden:
 
 quickstart.ipynb
+car application.ipynb
 static mapping.ipynb
 dynamic mapping.ipynb
 changelog.md
