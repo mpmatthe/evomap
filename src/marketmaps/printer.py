@@ -235,7 +235,7 @@ def draw_map(Y, c = None, labels = None, highlight_labels = None, inclusions = N
         mydpi = 300
         fig.savefig(filename, dpi = mydpi, format = 'png')
 
-    return ax
+    return fig
 
 def draw_map_sequence(Y_ts, c_ts = None, n_cols = 4, time_labels = [], **kwargs):
     """ Draw a sequence of static maps next to each other. Can use the same
