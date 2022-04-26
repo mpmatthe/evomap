@@ -82,3 +82,27 @@ def load_tnic_sample_small():
         df_tnic = pd.read_csv(f)
 
     return df_tnic
+
+
+def load_car_data():
+    """ Load car dataset, containing perceptual and preference ratings of competing cars. 
+
+    Data is taken from the following book, with some modifications: 
+
+    Lilien, G. L., & Rangaswamy, A. (2004). Marketing engineering: computer-assisted marketing analysis and planning (2nd revised edition). DecisionPro.
+
+    Returns
+    -------
+    dict
+        Dictionary containing the perceptual ratings and preference ratings.
+    """
+
+    with resources.path("marketmaps.data.cars", "customer_preference_ratings.csv") as f:
+        df_preferences = pd.read_csv(f)
+
+    with resources.path("marketmaps.data.cars", "perceptual_attribute_ratings.csv") as f:
+        df_attributes = pd.read_csv(f, index_col = 0)
+
+    return {'preferences': df_preferences, 'attributes': df_attributes}
+
+
