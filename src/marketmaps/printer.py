@@ -294,6 +294,69 @@ def draw_map_sequence(Y_ts, c_ts = None, n_cols = 4, time_labels = [], **kwargs)
             row += 1
             col = 0
 
+def fit_attribute(coords, attribute_label, attribute_values, map):
+    """ Fit an attribute to the map and display the resultant vector.
+
+    To do so, regress the attribute value on map coordinates and use
+    the coefficients as arrow coordinates.
+
+    Parameters
+    ----------
+    coords : ndarray of shape (n_samples, n_dims)
+        Map coordinates.
+    attribute_label : string
+        Attribute label (displayed next to vector).
+    attribute_values : ndarray of shape (n_samples,)
+        Attribute values for each sample.
+    map : matplotlib.figure
+        Figure containing the map (i.e., output of draw_map function)
+
+    Returns
+    -------
+    matplotlib.figure
+        Figure containing the map with property vector added.
+    """
+    import statsmodels.api as sm
+    SCALE = 10
+    ax = map.axes[0]
+    X = coords
+    y = attribute_values
+    est=sm.OLS(y, X)
+    result = est.fit().params
+    result['x1']
+    result['x2']
+    ax.arrow(0,0,result['x1']*SCALE,result['x2']*SCALE, linestyle = '--', lw = .25, alpha = .75, width = .001, color = 'grey',  head_width = 0.1)
+    ax.text(result['x1']*1.1*SCALE, result['x2']*1.1*SCALE, attribute_label, fontdict= {'size': 8, 'color': 'darkblue', 'weight': 'normal'})
+    return map
+
+def fit_attributes(map_coords, df_attributes, map):
+    """ Fit multiple attributes and display their vectors in the map.
+
+    Parameters
+    ----------
+    map_coords : ndarray of shape (n_samples, n_dims)
+        Map coordinates.
+    df_attributes : pd.DataFrame
+        Dataframe containing the attributes. Each column is expected to 
+        correspond to one attribute. Make sure to label colums and 
+        that the number of rows equals n_samples.
+    map : matplotlib.figure
+        Figure containing the map (i.e., output of draw_map function)
+
+    Returns
+    -------
+    matplotlib.figure
+        Figure containing the map with property vectors added.
+    """
+
+    for attribute in df_attributes.columns:
+        map = fit_attribute(
+            coords = map_coords, 
+            attribute_label = attribute,
+            attribute_values = df_attributes[attribute], 
+            map = map)
+    return map
+
 def draw_dynamic_map(Y_ts, c_ts = None, incl_ts = None, show_arrows = False, 
     show_last_positions_only = False, highlight_trajectories = None, 
     transparency_start = 0.1, transparency_end = 0.4, transparency_final = 1., 
@@ -569,7 +632,7 @@ def draw_trajectories(Y_ts, labels, selected_labels = None, title_str = None,
     if not title_str is None:
         ax.set_title(title_str, fontsize = DEFAULT_FONT_SIZE)
 #    adjust_text(texts, force_points = 0.15,  arrowprops=dict(arrowstyle="->", color='grey', lw=0.5))
-    plt.show()
+    return fig
 
 def init_params(custom_params = None):
     """
