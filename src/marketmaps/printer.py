@@ -18,7 +18,7 @@ from cycler import cycler
 DEFAULT_BUBBLE_SIZE = 25
 DEFAULT_FONT_SIZE = 10
 
-def draw_map(Y, c = None, labels = None, highlight_labels = None, inclusions = None, 
+def draw_map(Y, c = None, size = None, labels = None, highlight_labels = None, inclusions = None, 
     zoom_on_cluster = None, annotate = None, filename = None, ax = None, 
     fig_size = None, show_box = True, cmap = None, rcparams = None, title_str = None,
     fontdict = None, title_fontdict = None, scatter_kws = {}):
@@ -157,10 +157,11 @@ def draw_map(Y, c = None, labels = None, highlight_labels = None, inclusions = N
     
     scatter_kws.update(
         {'facecolors': df_data['color'], 'edgecolors': df_data['color']})
-    
-    if not 's' in scatter_kws.keys():
-        # Set bubble size to a default value
+
+    if size is None:
         scatter_kws['s'] = DEFAULT_BUBBLE_SIZE
+    else:
+        scatter_kws['s'] = size
 
     p = sns.regplot(
             x = 'x', 
@@ -226,9 +227,6 @@ def draw_map(Y, c = None, labels = None, highlight_labels = None, inclusions = N
         plt.box(on = None)
     else:
         plt.box(on = True)
-
-    if ax is None:
-        plt.show()
 
     # Save or show plot 
     if not filename == None:
