@@ -207,3 +207,28 @@ def expand_matrices(Xts, names_t):
 	S_ts = [S_t.values for S_t in S_ts]
 
 	return S_ts, Inc_ts, all_labels
+
+def calc_distances(X, metric = 'euclidean'):
+    """ Caluclate matrix of pairwise distances among the rows of an input 
+    matrix. 
+
+    Parameters
+    ----------
+    X : ndarray of shape (n_samples, n_dims)
+        Input matrix.
+
+    metric: string
+        The distance metric to use. Can be any of 
+        'braycurtis', 'canberra', 'chebyshev', 'cityblock', 'correlation', 
+        'cosine', 'dice', 'euclidean', 'hamming', 'jaccard', 'jensenshannon', 
+        'kulsinski', 'kulczynski1', 'mahalanobis', 'matching', 'minkowski', 
+        'rogerstanimoto', 'russellrao', 'seuclidean', 'sokalmichener', 
+        'sokalsneath', 'sqeuclidean', 'yule'.
+
+	Returns:
+		ndarray of shape (n_samples, n_samples): Matrix of pairwise distances.
+	"""
+
+    from scipy.spatial.distance import squareform, pdist
+    dist_mat = squareform(pdist(X, metric = metric))
+    return dist_mat
