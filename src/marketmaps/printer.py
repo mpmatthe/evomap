@@ -70,6 +70,7 @@ def draw_map(Y, c = None, size = None, labels = None, highlight_labels = None, i
 
     if not labels is None:
         labels = np.array(labels)
+        annotate = 'labels'
 
     if not highlight_labels is None:
         # In case a single label is given, put it into a list
@@ -151,10 +152,13 @@ def draw_map(Y, c = None, size = None, labels = None, highlight_labels = None, i
     init_params(rcparams)
 
     if ax is None:
+        return_fig = True
         if fig_size is None:
             fig_size = (5,5)
         fig, ax = plt.subplots(figsize = fig_size)
-    
+    else:
+        return_fig = False
+
     scatter_kws.update(
         {'facecolors': df_data['color'], 'edgecolors': df_data['color']})
 
@@ -233,7 +237,8 @@ def draw_map(Y, c = None, size = None, labels = None, highlight_labels = None, i
         mydpi = 300
         fig.savefig(filename, dpi = mydpi, format = 'png')
 
-    return fig
+    if return_fig:
+        return fig
 
 def draw_map_sequence(Y_ts, c_ts = None, n_cols = 4, time_labels = [], **kwargs):
     """ Draw a sequence of static maps next to each other. Can use the same
