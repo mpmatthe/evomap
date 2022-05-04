@@ -28,12 +28,23 @@ For a quickstart on how to use `marketmaps`, see <a href = 'car_application.ipyn
 If you want to dive deaper into what `marketmaps` has to offer, see the following examples:
 
 1. <a href = 'static mapping.html'>Static Mapping</a>
-
 2. <a href = 'dynamic mapping.html'>Dynamic Mapping</a>
 
 These examples are updated as new features are released!
 
-### Features work in progress
+## Mapping Methods
+
+Implementations for the following mapping methods are currently available:
+- CMDS (Classic Multidimensional Scaling)
+- MDS (Metric/Non Metric Multidimensional Scaling)
+- Sammon Mapping (non-linear MDS)
+- VOS (Visualization of Similarities)
+- EvoMap (implemented for t-SNE, MDS and Sammon Mapping)
+
+Moreover, `marketmaps` follows the syntax conventions of `scikit-learn`, such that 
+machine-learning techniques (such as t-SNE, LLE, Isomap, ... ) can easily be integrated. For more background, see <a href = 'https://scikit-learn.org/stable/modules/manifold.html'> here</a>.
+
+## Work in progress
 
 The following features are under active development und will be available in the near future:
 
@@ -46,14 +57,15 @@ This package is based on lots of own prepratory work and heavily inspired by the
 
 The following work either directly contributed or heavily inspired parts of this package: 
 
+```
 [1] Matthe, M., Ringel, D. M., Skiera, B. (2022), Mapping Market Structure Evolution. Working Paper.
 
 [2] Ringel, D. M., & Skiera, B. (2016). Visualizing asymmetric competition among more than 1,000 products using big search data. Marketing Science, 35(3), 511-534.
-
-[3] Ringel, D.M. (2022). Multi-Market Membership Mapping. Journal of Marketing Research, forthcoming. 
+```
 
 Finally, don't forget to give credit to different mapping algorithms' original authors when using them: 
 
+```
 [4] Van der Maaten, L., & Hinton, G. (2008). Visualizing data using t-SNE. Journal of Machine Learning Research, 9(11).
 
 [5] Sammon, J. W. (1969). A nonlinear mapping for data structure analysis. IEEE Transactions on computers, 100(5), 401-409.
@@ -61,6 +73,7 @@ Finally, don't forget to give credit to different mapping algorithms' original a
 [6] Eck, N. J. V., & Waltman, L. (2007). VOS: A new method for visualizing similarities between objects. In Advances in data analysis (pp. 299-306). Springer, Berlin, Heidelberg.
 
 [7] Kruskal, J. B. (1964). Multidimensional scaling by optimizing goodness of fit to a nonmetric hypothesis. Psychometrika, 29(1), 1-27.
+```
 
 ## Contributing
 
