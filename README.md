@@ -1,31 +1,34 @@
-# marketmaps
+# evomap
 
-A Python package for exploring markets in maps.
+A Python toolbox for evolving mapping of relationship data.
 
-`marketmaps` offers a comprehensive toolbox to create, explore and analyze market maps - that is, spatial representation of market actors' positions. 
-Such maps allow researchers and decision makers to identify key competitors, analyze their relative positioning, discover submarkets, or monitor a market's evolution over time. As such, they are an important ingredient of modern marketing analytics.
+`evomap` offers a comprehensive toolbox to create, explore and analyze spatial representations ('maps') from relationship data. Such maps are commonly applied in market structure analysis, study different kinds of networks (e.g., social, economic, or biological), political ideology, or more broadly to detect structure in high-dimensional data. 
 
-Creating market maps, however, is challenging. Doing so can require extensive preprocessing, . Moreover, implementations of different mapping algorithms are scattered across different platforms (e.g., MatLab, R, Python or R). Finally, exploring the resultant maps can provide further challenges - especially in larger or more complex markets. 
+Often, relationship data is retrievable over time, as markets and networks tend to evolve. `evomap` provides all necessary tools to analyze such data in maps either at a single period, or over time. Thereby, `evomap` provides an all-in-one solution and integrates many steps of the analysis into an easy-to-use API. Specifically, `evomap` includes modules for 
 
-To alleviate these challenges, `marketmaps` provides an all-in-one solution and integrates many steps of the analysis into a easy-to-use API. 
+- preprocessing
+- mapping
+- evaluation
+- plotting
+- export
 
-Note: `marketmaps` is still under active development. For any bug reports or feature requests, <a href = 'mailto:matthe@wiwi.uni-frankfurt.de'>please get in touch</a>.
+Note: Parts of `evomap` are still under active development. For any bug reports or feature requests, <a href = 'mailto:matthe@wiwi.uni-frankfurt.de'>please get in touch</a>.
 
 ## Installation
 
-As of now, `marketmaps` is available from GitHub. Stay tuned for a release on PyPi, which is coming soon! 
+As of now, `marketmaps` is available via GitHub. Stay tuned for a release on PyPi, which is coming soon! 
 
 ```bash
-$ pip install marketmaps
+# Add GitHub Installation Code
 ```
 
 ## Usage
 
-`marketmaps` entails different modules, corresponding to individual tasks of the market mapping process (such as preprocessing, mapping, ploting or evaluation).
+The following tutorial provide a good starting point for using `evomap`. 
 
-For a quickstart on how to use `marketmaps`, see <a href = 'car_application.ipynb'>this example</a>.
+For a quick overview on a typical market structure application, see <a href = 'car_application.ipynb'>this example</a>.
 
-If you want to dive deaper into what `marketmaps` has to offer, see the following examples:
+If you want to dive deaper into what `evomap` has to offer, check out the following examples on
 
 1. <a href = 'static mapping.html'>Static Mapping</a>
 2. <a href = 'dynamic mapping.html'>Dynamic Mapping</a>
@@ -34,46 +37,46 @@ These examples are updated as new features are released!
 
 ## Mapping Methods
 
-Implementations for the following mapping methods are currently available:
-- CMDS (Classic Multidimensional Scaling)
+As of now, `evomap` provides implementations of the following mapping methods:
 - MDS (Metric/Non Metric Multidimensional Scaling)
 - Sammon Mapping (non-linear MDS)
-- VOS (Visualization of Similarities)
-- EvoMap (implemented for t-SNE, MDS and Sammon Mapping)
+- t-SNE (t-distributed Stochastic Neighborhood Embedding)
 
-Moreover, `marketmaps` follows the syntax conventions of `scikit-learn`, such that 
-machine-learning techniques (such as t-SNE, LLE, Isomap, ... ) can easily be integrated. For more background, see <a href = 'https://scikit-learn.org/stable/modules/manifold.html'> here</a>.
+All methods can be applied both statically and dynamically. Moreover, `evomap` follows the syntax conventions of `scikit-learn`, such that other 
+machine-learning techniques (such as LLE, Isomap, ... ) can easily be integrated. For more background, see <a href = 'https://scikit-learn.org/stable/modules/manifold.html'> here</a>.
 
 ## Work in progress
 
-The following features are under active development und will be available in the near future:
+`evomap` is under active development. Thus, additional features will be available in the future, such as
 
-- estimation of consumers' ideal points (e.g., via multidimensional unfolding)
-- integration into scikit-learn pipelines
+- fitting consumers' ideal points 
+- further mapping methods
+- ...
 
 ## References
 
-This package is based on lots of own prepratory work and heavily inspired by the work of others. Moreover, many of the included implementations greatly benefited from extant implementations (e.g., in different programming languages). Thus, if you use this package, please consider citing the corresponding references.
-
-The following work either directly contributed or heavily inspired parts of this package: 
+This package is based on own work in 
 
 ```
 [1] Matthe, M., Ringel, D. M., Skiera, B. (2022), Mapping Market Structure Evolution. Working Paper.
+```
 
+<b><i>Please remember to cite this paper if you use any code from this package!</i></b>
+
+`evomap` also builds upon the work of others, including
+```
 [2] Ringel, D. M., & Skiera, B. (2016). Visualizing asymmetric competition among more than 1,000 products using big search data. Marketing Science, 35(3), 511-534.
-```
 
-Finally, don't forget to give credit to different mapping algorithms' original authors when using them: 
+[3] Torgerson, W. S. (1952). Multidimensional Scaling: I. Theory and method. Psychometrika, 17(4), 401-419.
 
-```
 [4] Van der Maaten, L., & Hinton, G. (2008). Visualizing data using t-SNE. Journal of Machine Learning Research, 9(11).
 
 [5] Sammon, J. W. (1969). A nonlinear mapping for data structure analysis. IEEE Transactions on computers, 100(5), 401-409.
 
-[6] Eck, N. J. V., & Waltman, L. (2007). VOS: A new method for visualizing similarities between objects. In Advances in data analysis (pp. 299-306). Springer, Berlin, Heidelberg.
-
-[7] Kruskal, J. B. (1964). Multidimensional scaling by optimizing goodness of fit to a nonmetric hypothesis. Psychometrika, 29(1), 1-27.
+[6] Kruskal, J. B. (1964). Multidimensional scaling by optimizing goodness of fit to a nonmetric hypothesis. Psychometrika, 29(1), 1-27.
 ```
+
+If you use the respective methods implemented in `evomap`, consider also citing the original references.
 
 ## Contributing
 
@@ -81,8 +84,8 @@ Interested in contributing? Check out the contributing guidelines. Please note t
 
 ## License
 
-`marketmaps` was created by Maximilian Matthe. It is licensed under the terms of the MIT license.
+`evomap` was created by Maximilian Matthe based on joint research with Daniel M. Ringel and Bernd Skiera. It is licensed under the terms of the MIT license. It is free to use, however, <b><i>please cite our work</i></b>.
 
 ## Credits
 
-`marketmaps` was created with [`cookiecutter`](https://cookiecutter.readthedocs.io/en/latest/) and the `py-pkgs-cookiecutter` [template](https://github.com/py-pkgs/py-pkgs-cookiecutter).
+`evomap` was created with [`cookiecutter`](https://cookiecutter.readthedocs.io/en/latest/) and the `py-pkgs-cookiecutter` [template](https://github.com/py-pkgs/py-pkgs-cookiecutter).
