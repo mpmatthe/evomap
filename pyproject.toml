@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "marketmaps"
+name = "evomap"
 version = "0.1.0"
-description = "A Python package for exploring markets in maps"
+description = "A Python Toolbox for Evolving Mapping of Relationship Data"
 authors = ["Maximilian Matthe"]
 license = "MIT"
 readme = "README.md"
