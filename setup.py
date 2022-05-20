@@ -26,7 +26,8 @@ install_requires = \
  'pandas>=1.3.3',
  'scipy>=1.7.0',
  'seaborn>=0.11.2',
- 'statsmodels>=0.13.2,<0.14.0']
+ 'statsmodels>=0.13.2,<0.14.0',
+ 'setuptools>=62.3.2']
 
 setup_kwargs = {
     'name': 'evomap',
