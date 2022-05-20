@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from setuptools import setup
 
 package_dir = \
 {'': 'src'}
@@ -48,4 +47,5 @@ setup_kwargs = {
 from build import *
 build(setup_kwargs)
 
+from setuptools import setup
 setup(**setup_kwargs)
