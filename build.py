@@ -17,7 +17,7 @@ else:
     # This function will be executed in setup.py:
     def build(setup_kwargs):
         # The file you want to compile
-        package = Extension('marketmaps.mapping.evomap._utils', ['src/marketmaps/mapping/evomap/_utils.pyx'], include_dirs=[numpy.get_include()])
+        package = Extension('evomap.mapping.evomap._utils', ['src/evomap/mapping/evomap/_utils.pyx'], include_dirs=[numpy.get_include()])
         extensions = [package]
 
         # gcc arguments hack: enable optimizations
