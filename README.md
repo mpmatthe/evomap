@@ -18,7 +18,11 @@ Note: Currently, `evomap` is available as a ***pre-release version***. Thus, par
 
 As of now, `marketmaps` is available via GitHub. Stay tuned for a release on PyPi, which is coming soon! 
 
+
+To install `evomap` run
 ```bash
+conda create -n evomap python=3.9
+conda activate evomap
 pip install git+https://github.com/mpmatthe/evomap
 ```
 
