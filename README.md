@@ -12,26 +12,26 @@ Often, relationship data is retrievable over time, as markets and networks tend 
 - plotting
 - export
 
-Note: Parts of `evomap` are still under active development. For any bug reports or feature requests, <a href = 'mailto:matthe@wiwi.uni-frankfurt.de'>please get in touch</a>.
+Note: Currently, `evomap` is available as a ***pre-release version***. Thus, parts of `evomap` are still under active development. For any bug reports or feature requests, <a href = 'mailto:matthe@wiwi.uni-frankfurt.de'>please get in touch</a>.
 
 ## Installation
 
 As of now, `marketmaps` is available via GitHub. Stay tuned for a release on PyPi, which is coming soon! 
 
 ```bash
-# Add GitHub Installation Code
+pip install git+https://github.com/mpmatthe/evomap
 ```
 
 ## Usage
 
 The following tutorial provide a good starting point for using `evomap`. 
 
-For a quick overview on a typical market structure application, see <a href = 'car_application.ipynb'>this example</a>.
+For a quick overview on a typical market structure application, see <a href = 'https://evomap.readthedocs.io/en/latest/car%20application.html'>this example</a>.
 
 If you want to dive deaper into what `evomap` has to offer, check out the following examples on
 
-1. <a href = 'static mapping.html'>Static Mapping</a>
-2. <a href = 'dynamic mapping.html'>Dynamic Mapping</a>
+1. <a href = 'https://evomap.readthedocs.io/en/latest/static%20mapping.html'>Static Mapping</a>
+2. <a href = 'https://evomap.readthedocs.io/en/latest/dynamic%20mapping.html'>Dynamic Mapping</a>
 
 These examples are updated as new features are released!
 
@@ -44,14 +44,6 @@ As of now, `evomap` provides implementations of the following mapping methods:
 
 All methods can be applied both statically and dynamically. Moreover, `evomap` follows the syntax conventions of `scikit-learn`, such that other 
 machine-learning techniques (such as LLE, Isomap, ... ) can easily be integrated. For more background, see <a href = 'https://scikit-learn.org/stable/modules/manifold.html'> here</a>.
-
-## Work in progress
-
-`evomap` is under active development. Thus, additional features will be available in the future, such as
-
-- fitting consumers' ideal points 
-- further mapping methods
-- ...
 
 ## References
 
