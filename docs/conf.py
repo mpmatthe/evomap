@@ -6,7 +6,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u"marketmaps"
+project = u"evomap"
 copyright = u"2022, Maximilian Matthe"
 author = u"Maximilian Matthe"
 
