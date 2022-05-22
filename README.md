@@ -18,13 +18,14 @@ Note: Currently, `evomap` is available as a ***pre-release version***. Thus, par
 
 As of now, `marketmaps` is available via GitHub. Stay tuned for a release on PyPi, which is coming soon! 
 
-
 To install `evomap` run
 ```bash
 conda create -n evomap python=3.9
 conda activate evomap
 pip install git+https://github.com/mpmatthe/evomap
 ```
+
+**Note:** Currently, `evomap` builds its C extensions upon installation on the system. Thus, it requires a C compiler to be present on the system. The right C compiler depends upon your system, e.g. GCC on Linux or MSVC on Windows. For details, see <a href = 'https://cython.readthedocs.io/en/latest/src/quickstart/install.html'>the Cython documentation</a>.
 
 ## Usage
 
