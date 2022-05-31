@@ -21,7 +21,7 @@ install_requires = \
  'ipykernel>=6.13.0',
  'matplotlib>=3.5.1',
  'numba>=0.55.1,<0.56.0',
- 'numpy=1.21.6',
+ 'numpy==1.21.6',
  'pandas>=1.3.3',
  'scipy>=1.7.0',
  'seaborn>=0.11.2',
