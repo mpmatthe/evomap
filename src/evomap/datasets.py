@@ -1,7 +1,5 @@
 """
 Sample data for demonstration purpose.
-
-Author: Maximilian Matthe <matthe@wiwi.uni-frankfurt.de>
 """
 from importlib import resources
 import numpy as np

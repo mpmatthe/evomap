@@ -1,3 +1,9 @@
+""" 
+T-Distributed Stochastic Neighborhood Embedding, as propsoed in:
+
+Van der Maaten, L., & Hinton, G. (2008). Visualizing data using t-SNE. Journal of machine learning research, 9(11).
+"""
+
 import numpy as np
 from scipy.spatial.distance import cdist
 from numba import jit

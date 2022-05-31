@@ -1,3 +1,9 @@
+"""
+Nonlinear Sammon Mapping, as proposed in: 
+
+Sammon, J. W. (1969). A nonlinear mapping for data structure analysis. IEEE Transactions on computers, 100(5), 401-409.
+"""
+
 import numpy as np
 from scipy.spatial.distance import cdist
 from numba import jit

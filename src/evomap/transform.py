@@ -1,3 +1,6 @@
+"""
+Useful transformations after maps have been generated.
+"""
 from scipy.linalg import orthogonal_procrustes
 import numpy as np
 

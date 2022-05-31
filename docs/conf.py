@@ -25,10 +25,7 @@ autoapi_dirs = ["../src"]
 
 nbsphinx_timeout = -1
 nb_execution_timeout = -1
-nb_execution_mode = "cache"
-jupyter_execute_notebooks = "auto"
-
-execution_timeout = -1
+nb_execution_mode = "off"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -40,4 +37,4 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "sphinx_book_theme"

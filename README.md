@@ -1,6 +1,4 @@
-# evomap
-
-A Python toolbox for evolving mapping of relationship data.
+# evomap - A Python toolbox for evolving mapping of relationship data.
 
 `evomap` offers a comprehensive toolbox to create, explore and analyze spatial representations ('maps') from relationship data. Such maps are commonly applied in market structure analysis, study different kinds of networks (e.g., social, economic, or biological), political ideology, or more broadly to detect structure in high-dimensional data. 
 
@@ -16,7 +14,7 @@ Note: Currently, `evomap` is available as a ***pre-release version***. Thus, par
 
 ## Installation
 
-As of now, `marketmaps` is available via GitHub. Stay tuned for a release on PyPi, which is coming soon! 
+As of now, `evomap` is available via GitHub. Stay tuned for a release on PyPi, which is coming soon! 
 
 To install `evomap` run
 ```bash
@@ -81,7 +79,7 @@ Interested in contributing? Check out the contributing guidelines. Please note t
 
 ## License
 
-`evomap` was created by Maximilian Matthe based on joint research with Daniel M. Ringel and Bernd Skiera. It is licensed under the terms of the MIT license. It is free to use, however, <b><i>please cite our work</i></b>.
+`evomap` is licensed under the terms of the MIT license. It is free to use, however, <b><i>[please cite our work][1]</i></b>.
 
 ## Credits
 

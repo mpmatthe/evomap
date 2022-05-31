@@ -1,7 +1,5 @@
 """
 Useful transformation for data pre-processing.
-
-Author: Maximilian Matthe <matthe@wiwi.uni-frankfurt.de>
 """
 
 import numpy as np

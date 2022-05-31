@@ -1,5 +1,7 @@
-# Functions shared within mapping module. Mostly related to different
-# optimization routines implemented and adjusted for mapping. 
+"""
+Core functions shared within mapping module. Mostly related to different
+optimization routines implemented and adjusted for mapping. 
+"""
 
 import numpy as np
 EPSILON = 1e-12

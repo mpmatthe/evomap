@@ -1,3 +1,6 @@
+"""
+Stress-Based Multidimensional Scaling.
+"""
 import numpy as np
 from scipy.spatial.distance import cdist
 from numba import jit

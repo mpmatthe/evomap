@@ -1,3 +1,7 @@
+"""
+EvoMap, implemented for Stress-Based MDS.
+"""
+
 import numpy as np
 from scipy.spatial.distance import cdist
 from numba import jit

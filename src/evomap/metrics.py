@@ -1,7 +1,5 @@
 """
-Useful functions to evaluate market maps.
-
-Author: Maximilian Matthe <matthe@wiwi.uni-frankfurt.de>
+Useful functions to evaluate maps.
 """
 
 import numpy as np

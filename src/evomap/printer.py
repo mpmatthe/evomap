@@ -1,7 +1,5 @@
 """
-Useful functions to draw market maps.
-
-Author: Maximilian Matthe <matthe@wiwi.uni-frankfurt.de>
+Useful functions to draw maps.
 """
 
 from multiprocessing.sharedctypes import Value

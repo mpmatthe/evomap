@@ -1,3 +1,6 @@
+"""
+C extensions, e.g. for binary perplexity search in t-SNE.
+"""
 from libc cimport math
 cimport cython
 import numpy as np

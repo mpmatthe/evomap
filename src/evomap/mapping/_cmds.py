@@ -1,7 +1,12 @@
-# thanks to Francis Song for this function
-# source: http://www.nervouscomputer.com/hfs/cmdscale-in-python/
-from __future__ import division
- 
+"""
+Classic (SVD-based) Multidimensional Scaling, as proposed in:
+
+Torgerson, W.S. Multidimensional scaling: I. Theory and method. Psychometrika 17, 401–419 (1952).
+
+Thanks to Francis Song, from whom this implementation has borrowed. Source: http://www.nervouscomputer.com/hfs/cmdscale-in-python/
+"""
+
+from __future__ import division 
 import numpy as np
 
 class CMDS():
