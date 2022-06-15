@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "evomap"
 version = "0.1.0"
-description = "A Python Toolbox for Evolving Mapping of Relationship Data"
+description = "A Python Toolbox for Mapping Evolving Relationship Data"
 authors = ["Maximilian Matthe"]
 license = "MIT"
 readme = "README.md"

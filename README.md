@@ -1,51 +1,55 @@
-# evomap - A Python toolbox for evolving mapping of relationship data.
+# evomap - A Python Toolbox for Mapping Evolving Relationship Data
 
-`evomap` offers a comprehensive toolbox to create, explore and analyze spatial representations ('maps') from relationship data. Such maps are commonly applied in market structure analysis, study different kinds of networks (e.g., social, economic, or biological), political ideology, or more broadly to detect structure in high-dimensional data. 
+`evomap` offers a comprehensive toolbox to create, explore and analyze spatial representations ('maps') from relationship data. Common applications include Marketing (market structure analysis), Network Analysis (e.g., social, economic, or biological networks), Political Science, or High-Dimensional Data Analysis in general. 
 
-Often, relationship data is retrievable over time, as markets and networks tend to evolve. `evomap` provides all necessary tools to analyze such data in maps either at a single period, or over time. Thereby, `evomap` provides an all-in-one solution and integrates many steps of the analysis into an easy-to-use API. Specifically, `evomap` includes modules for 
+Often, relationship data is retrievable over time, as markets and networks tend to evolve. `evomap` provides all necessary tools to analyze such data in maps either in static snapshots at a single point in time, or in evolving maps across multiple periods. `evomap` provides an all-in-one solution and integrates many steps of the analysis into an easy-to-use API. Specifically, `evomap` includes modules for 
 
 - preprocessing
-- mapping
+- mapping (static/dynamic)
 - evaluation
 - plotting
-- export
 
-Note: Currently, `evomap` is available as a ***pre-release version***. Thus, parts of `evomap` are still under active development. For any bug reports or feature requests, <a href = 'mailto:matthe@wiwi.uni-frankfurt.de'>please get in touch</a>.
+Note: As of now, `evomap` is available as a ***pre-release version*** and parts of `evomap` are still under active development. For any bug reports or feature requests, <a href = 'mailto:matthe@wiwi.uni-frankfurt.de'>please get in touch</a>.
 
 ## Installation
 
-As of now, `evomap` is available via GitHub. Stay tuned for a release on PyPi, which is coming soon! 
+This pre-release is available via GitHub. Stay tuned for a release on PyPi, which is coming soon! 
 
 To install `evomap` run
+```bash
+pip install git+https://github.com/mpmatthe/evomap
+```
+
+`evomap` requires Python version 3.7 (or higher). We recommend Python version 3.9 within a virtual environment, for instance via conda:
 ```bash
 conda create -n evomap python=3.9
 conda activate evomap
 pip install git+https://github.com/mpmatthe/evomap
 ```
 
-**Note:** Currently, `evomap` builds its C extensions upon installation on the system. Thus, it requires a C compiler to be present on the system. The right C compiler depends upon your system, e.g. GCC on Linux or MSVC on Windows. For details, see <a href = 'https://cython.readthedocs.io/en/latest/src/quickstart/install.html'>the Cython documentation</a>.
+**Note:** Currently, `evomap` builds its C extensions upon installation on the system. Thus, it requires a C compiler to be present. The right C compiler depends upon your system, e.g. GCC on Linux or MSVC on Windows. For details, see <a href = 'https://cython.readthedocs.io/en/latest/src/quickstart/install.html'>the Cython documentation</a>. In future versions, extensions will be pre-compiled.
 
 ## Usage
 
-The following tutorial provide a good starting point for using `evomap`. 
+The following tutorials provide a good starting point for using `evomap`. 
 
-For a quick overview on a typical market structure application, see <a href = 'https://evomap.readthedocs.io/en/latest/car%20application.html'>this example</a>.
+For a simple introduction to a typical market structure application, see <a href = 'https://evomap.readthedocs.io/en/latest/car%20application.html'>this example</a>.
 
 If you want to dive deaper into what `evomap` has to offer, check out the following examples on
 
 1. <a href = 'https://evomap.readthedocs.io/en/latest/static%20mapping.html'>Static Mapping</a>
 2. <a href = 'https://evomap.readthedocs.io/en/latest/dynamic%20mapping.html'>Dynamic Mapping</a>
 
-These examples are updated as new features are released!
+Updated versions of these examples will be available as new features are released. 
 
 ## Mapping Methods
 
 As of now, `evomap` provides implementations of the following mapping methods:
-- MDS (Metric/Non Metric Multidimensional Scaling)
+- MDS (Multidimensional Scaling)
 - Sammon Mapping (non-linear MDS)
 - t-SNE (t-distributed Stochastic Neighborhood Embedding)
 
-All methods can be applied both statically and dynamically. Moreover, `evomap` follows the syntax conventions of `scikit-learn`, such that other 
+You can apply all methods statically and dynamically. Moreover, `evomap` follows the syntax conventions of `scikit-learn`, such that other 
 machine-learning techniques (such as LLE, Isomap, ... ) can easily be integrated. For more background, see <a href = 'https://scikit-learn.org/stable/modules/manifold.html'> here</a>.
 
 ## References
@@ -56,7 +60,7 @@ This package is based on the authors' work in
 [1] Matthe, M., Ringel, D. M., Skiera, B. (2022), Mapping Market Structure Evolution. Working Paper.
 ```
 
-<b><i>Please remember to cite this paper if you use any code from this package!</i></b>
+<b><i>Please cite our paper if you use this package or part of its code</i></b>
 
 `evomap` also builds upon the work of others, including
 ```
@@ -79,7 +83,7 @@ Interested in contributing? Check out the contributing guidelines. Please note t
 
 ## License
 
-`evomap` is licensed under the terms of the MIT license. It is free to use, however, <b><i>[please cite our work][1]</i></b>.
+`evomap` is licensed under the terms of the MIT license. It is free to use, however, <i>please cite our work</i>.
 
 ## Credits
 
