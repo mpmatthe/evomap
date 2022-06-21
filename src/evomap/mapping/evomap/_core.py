@@ -66,7 +66,7 @@ class EvoMap():
                 W = np.max(W) - W
             elif self.weighting == 'exponential':
                 if np.max(W) > 1e-12:
-                    lamb = 1/np.max(W) # If all goes wrong, readjust to lamb = 5 / np.max(W)
+                    lamb = 1/np.max(W) 
                     W = np.exp(-(lamb * W))
                 else:
                     W = np.ones_like(W)
@@ -74,7 +74,7 @@ class EvoMap():
                 raise ValueError("Unkown weighting scheme: {}.".format(self.weighting))
 
         # Normalize to [0,1]:
-        if np.max(W) > 1e-12:
+        if np.max(W) > 1:
             W = W / np.max(W)
         else:
             print("Weights not calculated. Input data might be fully static.")
