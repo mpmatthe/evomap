@@ -57,7 +57,7 @@ machine-learning techniques (such as LLE, Isomap, ... ) can easily be integrated
 This package is based on the authors' work in 
 
 ```
-[1] Matthe, M., Ringel, D. M., Skiera, B. (2022), Mapping Market Structure Evolution. Working Paper.
+[1] Matthe, M., Ringel, D. M., Skiera, B. (2022), Mapping Market Structure Evolution. Marketing Science, forthcoming.
 ```
 
 <b><i>Please cite our paper if you use this package or part of its code</i></b>
