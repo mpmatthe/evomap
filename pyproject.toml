@@ -2,7 +2,7 @@
 name = "evomap"
 version = "0.1.0"
 description = "A Python Toolbox for Mapping Evolving Relationship Data"
-authors = ["Maximilian Matthe"]
+authors = ["Maximilian Matthe, Daniel M. Ringel, and Bernd Skiera"]
 license = "MIT"
 readme = "README.md"
 build = 'build.py'
