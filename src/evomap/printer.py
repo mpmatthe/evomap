@@ -419,14 +419,8 @@ def draw_dynamic_map(Y_ts, c_ts = None, incl_ts = None, show_arrows = False,
     # Data preparation
     transparencies = np.linspace(transparency_start, transparency_end, n_periods-1).tolist()
     transparencies.append(transparency_final)
-    if not highlight_trajectories is None:
-        highlighted_transparencies = np.linspace(transparency_end, transparency_final,n_periods).tolist()
   
     highlight_colors = ['darkred', 'orange', 'darkgreen', 'slategrey']
-#   highlight_colors = ["#ff7f0e", "#2ca02c", "#d62728", "#9467bd"]
-
-#    if show_arrows_subset is None:
- #       show_arrows_subset = np.repeat(1, len(coords[0]))
 
     if not 'labels' in kwargs.keys():
         labels = np.array([str(i+1) for i in range(n_samples)])
