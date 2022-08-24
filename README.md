@@ -47,7 +47,7 @@ Updated versions of these examples will be available as new features are release
 As of now, `evomap` provides implementations of the following mapping methods:
 - MDS (Multidimensional Scaling)
 - Sammon Mapping (non-linear MDS)
-- t-SNE (t-distributed Stochastic Neighborhood Embedding)
+- t-SNE (t-distributed Stochastic Neighbor Embedding)
 
 You can apply all methods statically and dynamically. Moreover, `evomap` follows the syntax conventions of `scikit-learn`, such that other 
 machine-learning techniques (such as LLE, Isomap, ... ) can easily be integrated. For more background, see <a href = 'https://scikit-learn.org/stable/modules/manifold.html'> here</a>.
