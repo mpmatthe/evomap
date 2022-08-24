@@ -15,7 +15,6 @@ class EvoSammon(EvoMap):
         self,
         alpha = 0,                      
         p = 1,                          
-        weighting = 'exponential',       
         n_dims = 2, 
         n_iter = 2000,  
         n_iter_check = 50,
@@ -29,7 +28,7 @@ class EvoSammon(EvoMap):
         max_tries = 5
     ):
 
-        super().__init__(alpha = alpha, p = p, weighting= weighting)
+        super().__init__(alpha = alpha, p = p)
         self.n_dims = n_dims
         self.n_iter = n_iter
         self.n_iter_check = n_iter_check

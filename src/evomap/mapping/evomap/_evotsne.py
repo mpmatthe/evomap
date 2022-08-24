@@ -15,7 +15,6 @@ class EvoTSNE(EvoMap):
         self,
         alpha = 0,                      
         p = 1,                          
-        weighting = 'exponential',       
         n_dims = 2, 
         perplexity = 15,  
         stop_lying_iter = 250,
@@ -30,11 +29,11 @@ class EvoTSNE(EvoMap):
         input_type = 'distance', 
         maxhalves = 5, 
         tol = 1e-3,  
-        n_inits = 1, 
+        n_inits = 1,
         max_tries = 5
     ):
 
-        super().__init__(alpha = alpha, p = p, weighting= weighting)
+        super().__init__(alpha = alpha, p = p)
         self.n_dims = n_dims
         self.perplexity = perplexity
         self.stop_lying_iter = stop_lying_iter

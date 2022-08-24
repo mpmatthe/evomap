@@ -47,39 +47,20 @@ class EvoMap():
         n_samples = Xs[0].shape[0]
         n_periods = len(Xs)
         W = np.zeros((n_samples))
-        if self.weighting is None:
-            W += 1
-        else:
-
-            for t in range(1, n_periods):
-                delta = Xs[t] - Xs[t-1]
-                delta = np.power(delta, 2)
-                delta = delta.sum(axis = 1)
-                delta = delta.reshape(n_samples)
-                W += delta
-                
-            if self.weighting == 'inverse':
-                W = np.power(W, -1)
-            elif self.weighting == 'inverse_plus':
-                W = np.power(W+1, -1)
-            elif self.weighting == 'mirror':
-                W = np.max(W) - W
-            elif self.weighting == 'exponential':
-                if np.max(W) > 1e-12:
-                    lamb = 1/np.max(W) 
-                    W = np.exp(-(lamb * W))
-                else:
-                    W = np.ones_like(W)
-            else:
-                raise ValueError("Unkown weighting scheme: {}.".format(self.weighting))
-
-        # Normalize to [0,1]:
-        if np.max(W) > 1:
-            W = W / np.max(W)
+        for t in range(1, n_periods):
+            delta = Xs[t] - Xs[t-1]
+            delta = np.power(delta, 2)
+            delta = delta.sum(axis = 1)
+            delta = delta.reshape(n_samples)
+            W += delta
+            
+        if np.max(W) > 1e-12:
+            lamb = 1/np.max(W) 
+            W = np.exp(-(lamb * W))
         else:
             print("Weights not calculated. Input data might be fully static.")
             W = np.ones_like(W)
-            
+           
         W_all_periods = np.tile(W, n_periods).reshape((n_periods*n_samples, 1))
         return W_all_periods
 

@@ -15,7 +15,6 @@ class EvoMDS(EvoMap):
         self,
         alpha = 0,                      
         p = 1,                          
-        weighting = 'exponential',       
         n_dims = 2, 
         metric = True,  
         n_iter = 2000,  
@@ -31,7 +30,7 @@ class EvoMDS(EvoMap):
         max_tries = 5
     ):
 
-        super().__init__(alpha = alpha, p = p, weighting= weighting)
+        super().__init__(alpha = alpha, p = p)
         self.n_dims = n_dims
         self.metric = metric
         self.n_iter = n_iter
