@@ -59,7 +59,7 @@ This package is based on the authors' work in
 ```
 [1] Matthe, M., Ringel, D. M., Skiera, B. (2022), Mapping Market Structure Evolution. Marketing Science, forthcoming.
 ```
-Open Access to Paper: <a href = 'https://doi.org/10.1287/mksc.2022.1385'>https://doi.org/10.1287/mksc.2022.1385</a> 
+Read the full paper here (open access): <a href = 'https://doi.org/10.1287/mksc.2022.1385'>https://doi.org/10.1287/mksc.2022.1385</a> 
 
 <b><i>Please cite our paper if you use this package or part of its code</i></b>
 
