@@ -199,7 +199,7 @@ def gradient_descent_with_momentum(objective,
         error, grad = objective(Y, *args, **kwargs)
 
         if np.any(grad >= 1/EPSILON):
-            print('[{0}] Diverging gradient norm at iteration {1}'.format(method_str, i+1))
+            print('[{0}] Diverging gradient norm at iteration {1}'.format(method_str, iter+1))
             raise DivergingGradientError()
 
         dec = np.sign(iY) == np.sign(grad)
