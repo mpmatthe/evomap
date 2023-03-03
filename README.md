@@ -20,7 +20,7 @@ To install `evomap` run
 pip install git+https://github.com/mpmatthe/evomap
 ```
 
-`evomap` requires Python version 3.7 (or higher). We recommend Python version 3.9 within a virtual environment, for instance via conda:
+`evomap` requires Python version 3.7.1 (or higher). We recommend Python version 3.9 within a virtual environment, for instance via conda:
 ```bash
 conda create -n evomap python=3.9
 conda activate evomap
