@@ -1,15 +1,18 @@
 import os
-
 # See if Cython is installed
+
 try:
     from Cython.Build import cythonize
 # Do nothing if Cython is not available
 except ImportError:
     # Got to provide this function. Otherwise, poetry will fail
+    print(" ------- WARNING: Cython Extensions not build sucessfully -------- ")
+
     def build(setup_kwargs):
         pass
 # Cython is installed. Compile
 else:
+    print("  .. building C extensions")
     from setuptools import Extension
     from setuptools.dist import Distribution
     from distutils.command.build_ext import build_ext
