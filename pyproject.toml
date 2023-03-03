@@ -11,6 +11,7 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.build]
+generate-setup-file = true
 script = "build.py"
 
 
