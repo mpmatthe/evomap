@@ -120,7 +120,11 @@ def _normalized_stress_gradient(positions, distances, disparities):
             grad_il = 0
             for j in range(n_samples):
                 if j != i:
-                    grad_il -= (1- disparities[i,j] / distances[i,j]) * (positions[j,l] - positions[i,l])
+                    dist_ij = distances[i,j]
+                    if dist_ij == 0:
+                        dist_ij += EPSILON
+                    grad_il -= (1- disparities[i,j] / dist_ij) * (positions[j,l] - positions[i,l])
+                
             gradient[i,l] = grad_il
     return gradient / (n_samples - 1)    
 
