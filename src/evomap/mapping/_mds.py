@@ -5,6 +5,9 @@ import numpy as np
 from scipy.spatial.distance import cdist
 from numba import jit
 from ._core import gradient_descent_line_search
+
+EPSILON = 1e-12
+
 class MDS():
 
     def __init__(
