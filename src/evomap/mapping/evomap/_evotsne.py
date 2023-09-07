@@ -7,7 +7,7 @@ from scipy.spatial.distance import cdist
 from numba import jit
 from ._core import EvoMap
 from ._core import _evomap_cost_function, _get_positions_for_period
-from evomap.mapping._core import DivergingGradientError
+from evomap.mapping._optim import DivergingGradientError
 
 class EvoTSNE(EvoMap):
 
@@ -27,7 +27,7 @@ class EvoTSNE(EvoMap):
         init = None, 
         verbose = 0, 
         input_type = 'distance', 
-        maxhalves = 5, 
+        max_halves = 5, 
         tol = 1e-3,  
         n_inits = 1,
         max_tries = 5
@@ -46,7 +46,7 @@ class EvoTSNE(EvoMap):
         self.init = init
         self.verbose = verbose
         self.input_type = input_type
-        self.maxhalves = maxhalves
+        self.max_halves = max_halves
         self.tol = tol
         self.n_inits = n_inits
         self.max_tries = max_tries
@@ -57,7 +57,7 @@ class EvoTSNE(EvoMap):
         return self
 
     def fit_transform(self, Xs):
-        from evomap.mapping._core import gradient_descent_with_momentum
+        from evomap.mapping._optim import gradient_descent_with_momentum
         from evomap.mapping._tsne import _kl_divergence, _check_prepare_tsne
 
         super()._validate_input(Xs)
@@ -145,7 +145,7 @@ class EvoTSNE(EvoMap):
                     Ys.append(_get_positions_for_period(Y, n_samples, t))
                 self.Ys_ = Ys
                 self.cost_ = cost
-                self.cost_static_ = super()._calc_static_cost(
+                self.cost_static_, self.costs_static_ = super()._calc_static_cost(
                     Xs = Ps, Y_all_periods= Y, static_cost_function=_kl_divergence)
                 self.cost_static_avg_ = self.cost_static_ / n_periods    
                 best_cost = cost

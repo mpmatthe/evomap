@@ -7,7 +7,7 @@ from scipy.spatial.distance import cdist
 from numba import jit
 from ._core import EvoMap
 from ._core import _evomap_cost_function, _get_positions_for_period
-from evomap.mapping._core import DivergingGradientError
+from evomap.mapping._optim import DivergingGradientError
 
 class EvoMDS(EvoMap):
 
@@ -16,14 +16,13 @@ class EvoMDS(EvoMap):
         alpha = 0,                      
         p = 1,                          
         n_dims = 2, 
-        metric = True,  
         n_iter = 2000,  
         n_iter_check = 50,
         init = None, 
+        mds_type = 'absolute',
         verbose = 0, 
-        optim = 'GD', 
         input_type = 'distance', 
-        maxhalves = 5, 
+        max_halves = 5, 
         tol = 1e-3,  
         n_inits = 1, 
         step_size = 1,
@@ -32,31 +31,31 @@ class EvoMDS(EvoMap):
 
         super().__init__(alpha = alpha, p = p)
         self.n_dims = n_dims
-        self.metric = metric
         self.n_iter = n_iter
         self.n_iter_check = n_iter_check
         self.init = init
         self.verbose = verbose
-        self.optim = optim
+        self.mds_type = mds_type
         self.input_type = input_type
-        self.maxhalves = maxhalves
+        self.max_halves = max_halves
         self.tol = tol
         self.n_inits = n_inits
         self.step_size = step_size
         self.max_tries = max_tries
         self.method_str = "EvoMDS"
 
-    def fit(self, Xs):
-        self.fit_transform(Xs)
+    def fit(self, Xs, inclusions = None):
+        self.fit_transform(Xs, inclusions)
         return self
 
-    def fit_transform(self, Xs):
-        from evomap.mapping._core import gradient_descent_line_search
+    def fit_transform(self, Xs, inclusions = None):
+        from evomap.mapping._optim import gradient_descent_line_search
         from evomap.mapping._mds import _normalized_stress_function
 
-        super()._validate_input(Xs)
                 
         # Check and prepare input data
+        super()._validate_input(Xs, inclusions)
+
         n_periods = len(Xs)
         if self.input_type == 'distance':
             Ds = Xs
@@ -79,43 +78,43 @@ class EvoMDS(EvoMap):
         best_cost = np.inf
         for i in range(self.n_inits):
             if self.verbose > 0:
-                print("[{0}] Initialization {1}/{2}".format(self.method_str,i+1, self.n_inits))
+                if self.n_inits > 1:
+                    print("[{0}] Initialization {1}/{2}".format(self.method_str,i+1, self.n_inits))
                 
             init = super()._initialize(Xs)
 
-            if self.optim == 'GD':
-                # Set gradient descent arguments
-                opt_args = {
-                    'init': init,
-                    'method_str': self.method_str,
-                    'n_iter': self.n_iter,
-                    'n_iter_check': self.n_iter_check,
-                    'step_size': self.step_size,
-                    'maxhalves': self.maxhalves,
-                    'min_grad_norm': self.tol,
-                    'verbose': self.verbose,
-                    'kwargs': {
-                        'static_cost_function': _normalized_stress_function, 
-                        'Ds': Ds,
-                        'alpha': self.alpha, 
-                        'p': self.p,
-                        'weights' : W}
-                }
+            # Set gradient descent arguments
+            opt_args = {
+                'init': init,
+                'method_str': self.method_str,
+                'n_iter': self.n_iter,
+                'n_iter_check': self.n_iter_check,
+                'step_size': self.step_size,
+                'max_halves': self.max_halves,
+                'min_grad_norm': self.tol,
+                'verbose': self.verbose,
+                'kwargs': {
+                    'static_cost_function': _normalized_stress_function, 
+                    'Ds': Ds,
+                    'alpha': self.alpha, 
+                    'p': self.p,
+                    'inclusions': inclusions,
+                    'weights' : W,
+                    'static_cost_kwargs': {'mds_type': self.mds_type}}
+            }
 
-                for ith_try in range(self.max_tries):
-                    try:
-                        Y, cost = gradient_descent_line_search(_evomap_cost_function, **opt_args)                        
-                        break
-                    except DivergingGradientError:
-                        print("[{0}] Adjusting step sizes..".format(self.method_str))
-                        self.step_size /= 2
-                        opt_args.update({'step_size': self.step_size})
+            for ith_try in range(self.max_tries):
+                try:
+                    Y, cost = gradient_descent_line_search(_evomap_cost_function, **opt_args)                        
+                    break
+                except DivergingGradientError:
+                    print("[{0}] Adjusting step sizes..".format(self.method_str))
+                    self.step_size /= 2
+                    opt_args.update({'step_size': self.step_size})
 
-                    if ith_try == self.max_tries -1:
-                        print("[{0}] ERROR: Gradient descent failed to converge.".format(self.method_str))
-                        return -1
-            else:
-                raise ValueError("Optimization routine should be 'GD'. SMACOF option not yet implemented.")
+                if ith_try == self.max_tries -1:
+                    print("[{0}] ERROR: Gradient descent failed to converge.".format(self.method_str))
+                    return -1
 
             if cost < best_cost:
                 Ys = []
@@ -123,8 +122,13 @@ class EvoMDS(EvoMap):
                     Ys.append(_get_positions_for_period(Y, n_samples, t))
                 self.Ys_ = Ys
                 self.cost_ = cost
-                self.cost_static_ = super()._calc_static_cost(
-                    Xs = Ds, Y_all_periods= Y, static_cost_function=_normalized_stress_function)
+                self.cost_static_, self.costs_static_ = super()._calc_static_cost(
+                    Xs = Ds, 
+                    Y_all_periods= Y, 
+                    inclusions = inclusions, 
+                    static_cost_function=_normalized_stress_function,
+                    static_cost_kwargs = {'mds_type': self.mds_type})
+                
                 self.cost_static_avg_ = self.cost_static_ / n_periods    
                 best_cost = cost
 

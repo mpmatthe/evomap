@@ -2,7 +2,6 @@
 Core functions shared by all implementations.
 """
 
-from multiprocessing.sharedctypes import Value
 import numpy as np
 import pandas as pd
 import copy
@@ -61,8 +60,8 @@ class EvoMap():
             print("Weights not calculated. Input data might be fully static.")
             W = np.ones_like(W)
            
-        W_all_periods = np.tile(W, n_periods).reshape((n_periods*n_samples, 1))
-        return W_all_periods
+        W = W.reshape((n_samples, 1))
+        return W
 
     def _initialize(self, Xs):
         """Create initialized positions for EvoMap.
@@ -81,16 +80,21 @@ class EvoMap():
         n_samples = Xs[0].shape[0]
         n_periods = len(Xs)
         if self.init is None:
-            init = np.random.normal(0,.1,(n_samples, self.n_dims))
-            init = np.concatenate([init]*n_periods, axis = 0)
+#            init = np.random.normal(0,.1,(n_samples, self.n_dims))
+#            init = np.concatenate([init]*n_periods, axis = 0)
+            init_t = np.zeros((0, self.n_dims))
+            for t in range(n_periods):
+                init = np.random.normal(0,.1,(n_samples, self.n_dims))
+                init_t = np.concatenate([init_t, init], axis = 0)
+
         else:
             # Stack list of initialization arrays
-            init = np.concatenate(self.init, axis = 0)
+            init_t = np.concatenate(self.init, axis = 0)
 
-        return init
+        return init_t
 
 
-    def _validate_input(self, Xs):
+    def _validate_input(self, Xs, inclusions = None):
         """ Validate input data vis-a-vis model parameters.
 
         Parameters
@@ -107,6 +111,17 @@ class EvoMap():
                 raise ValueError('Unequal shaped input data!') 
         n_samples = Xs[0].shape[0]
         
+        if not inclusions is None:
+            if not type(inclusions) is list:
+                raise ValueError('Invalid format for inclusions! Should be a list of (n_samples,) shaped arrays.')
+            if not len(inclusions) == len(Xs):
+                raise ValueError('Unequal number of inclusion and input data arrays!')
+            for t, inc_array in enumerate(inclusions):
+                if np.any(~np.isin(inc_array,[0,1])):
+                    raise ValueError('Inclusion arrays should only contain 0/1 entries!')
+                if len(inc_array) != Xs[t].shape[0]:
+                    raise ValueError('Inclusion array at period {0} does not match size of input data!'.format(t))
+
         if not self.init is None:
             if not type(self.init) is list:
                 raise ValueError('Invalid input type for init! Should be list.')
@@ -116,7 +131,7 @@ class EvoMap():
 
     @staticmethod
     def _calc_static_cost(
-        Xs, Y_all_periods, static_cost_function, args = None, kwargs = None):
+        Xs, Y_all_periods, static_cost_function, inclusions = None, args = None, kwargs = None, static_cost_kwargs = None):
         """ Calculate total static cost, i.e. sum over all static cost values
         across all periods.
 
@@ -128,6 +143,9 @@ class EvoMap():
             Map positions estimated by EvoMap
         static_cost_function : callable
             Static cost function
+        inclusions: list of np.arrays of shape (n_samples)
+            Sequence of 0/1 arrays indicating if an object is included in 
+            the estimation
         args : list, optional
             Additional arguments passed to the static cost function, by default None
         kwargs : dict, optional
@@ -146,15 +164,24 @@ class EvoMap():
         n_periods = len(Xs)
         n_samples = Xs[0].shape[0]
         kwargs.update({'compute_grad': False, 'compute_error': True})
+        cost_ts = []
         for t in range(n_periods):
             Y_t = _get_positions_for_period(Y_all_periods, n_samples, t)
-            cost_t, _ = static_cost_function(Y_t, Xs[t], *args, **kwargs)
+            if not inclusions is None:
+                Y_t = Y_t[inclusions[t] == 1, :]
+                X_t = Xs[t][inclusions[t] == 1, :][:, inclusions[t] == 1]
+            else:
+                X_t = Xs[t]
+            if static_cost_kwargs is None:
+                static_cost_kwargs = {}
+            cost_t, _ = static_cost_function(Y_t, X_t, *args, **kwargs, **static_cost_kwargs)
             cost += cost_t
-        return cost
+            cost_ts.append(cost_t)
+        return cost, cost_ts
 
     def grid_search(
-        self, Xs, param_grid, eval_functions = None, eval_labels = None, 
-        kwargs = None):
+        self, Xs, param_grid, inclusions = None, eval_functions = None, 
+        eval_labels = None, kwargs = None):
         """Fit model once for each parameter combination within the grid and 
         evaluate each run accordings to various metrics.
 
@@ -178,12 +205,12 @@ class EvoMap():
             Results for each parameter combination
 
         """
-        self._validate_input(Xs)
+        self._validate_input(Xs, inclusions)
 
         if kwargs is None:
             kwargs = {}
 
-        kwargs['Xs'] = Xs
+        kwargs['D_t'] = Xs
         if eval_labels is None:
             eval_labels = ['Metric_' + str(i+1) for i in range(len(eval_functions))]
 
@@ -211,11 +238,17 @@ class EvoMap():
             model_i = copy.deepcopy(model)
             model_i.set_params(param_combi)
             model_i.set_params({'verbose': 0})
-            Ys_i = model_i.fit_transform(Xs)
+            Ys_i = model_i.fit_transform(Xs, inclusions)
             df_i = {
                 'alpha': param_combi['alpha'], 
                 'p': int(param_combi['p']), 
                 'cost_static_avg': model_i.cost_static_avg_}
+            params = [item[0] for item in param_grid.items()]
+            params.remove('alpha')
+            params.remove('p')
+            
+            for param in params:
+                df_i.update({param: param_combi[param]})
 
             if not eval_functions is None:
                 for i, eval_fun in enumerate(eval_functions):
@@ -230,19 +263,21 @@ class EvoMap():
             df_res = pd.concat([df_res, df_i],ignore_index = True, axis = 0)
 
         df_res.reset_index()
+        df_res.set_index('alpha', inplace = True)
+
         if model.verbose > 0:
                 print("[{0}] Grid Search Completed.".format(model.method_str))
 
         return df_res
 
-    def fit(self, Xs):
+    def fit(self, Xs, inclusions = None):
         # Placeholder, needs to overridden by child class.
         raise NotImplementedError
 
-    def fit_transform(self, Xs):
+    def fit_transform(self, Xs, inclusions = None):
         # Placeholder, needs to overriden by child class.
         raise NotImplementedError
-
+        
 def _evomap_cost_function(
     Y_all_periods, 
     Ds, 
@@ -250,8 +285,10 @@ def _evomap_cost_function(
     weights, 
     alpha, 
     p,
+    inclusions = None,
     compute_error = True, 
-    compute_grad = True, 
+    compute_grad = True,
+    static_cost_kwargs = None, 
     args = None, 
     kwargs = None):
     """ EvoMap's cost function for a given static cost function.
@@ -272,6 +309,9 @@ def _evomap_cost_function(
         Hyperparamter alpha, controlling the strength of alignment. 
     p : int
         Hyperparameter p, controlling the degree of smoothing.
+    inclusions: list of n_period np.arrays of shape (n_samples)
+        Sequence of inclusion arrays, each containing (n_samples) 0/1 entries
+        indicating if an object should be included in the estimation
     compute_error : bool, optional
         True if cost function value should be computed, by default True
     compute_grad : bool, optional
@@ -289,7 +329,6 @@ def _evomap_cost_function(
     ndarray of shape (n_samples * n_periods, n_dims)
         Gradient
     """
-
     if args is None:
         args = []
 
@@ -300,8 +339,9 @@ def _evomap_cost_function(
     n_samples = Ds[0].shape[0]
     n_dims = Y_all_periods.shape[1]
 
-    for t in range(n_periods):
-        Y_t = Y_all_periods[(t*n_samples):((t+1)*n_samples), :]
+
+#    for t in range(n_periods):
+#        Y_t = Y_all_periods[(t*n_samples):((t+1)*n_samples), :]
 
     if compute_error:
         
@@ -310,12 +350,24 @@ def _evomap_cost_function(
         kwargs.update({'compute_grad': False, 'compute_error': True})
         for t in range(n_periods):
             Y_t = _get_positions_for_period(Y_all_periods, n_samples, t)
-            cost_t, _ = static_cost_function(Y_t, Ds[t], *args, **kwargs)
+            
+            # If necessary, drop excluded observations before calculating the cost function
+            if not inclusions is None:
+                Y_t = Y_t[inclusions[t] == 1, :]
+                D_t = Ds[t][inclusions[t] == 1, :][:, inclusions[t]==1]
+            else:
+                D_t = Ds[t]
+
+            if static_cost_kwargs is None:
+                static_cost_kwargs = {}
+            cost_t, _ = static_cost_function(Y_t, D_t, *args, **kwargs, **static_cost_kwargs)
             cost += cost_t
 
         # Calculate temporal cost
-        temp_cost, _ = _evomap_temporal_cost_function(Y_all_periods, n_periods, weights, alpha, p, **kwargs)
+        temp_cost, _ = _evomap_temporal_cost_function(
+            Y_all_periods, n_periods, weights, alpha, p, inclusions, **kwargs)
         cost += temp_cost
+
     else:
         cost = None
     
@@ -325,16 +377,31 @@ def _evomap_cost_function(
         kwargs.update({'compute_grad': True, 'compute_error': False})
         for t in range(n_periods):
             Y_t = _get_positions_for_period(Y_all_periods, n_samples, t)
-            _, grad_t = static_cost_function(Y_t, Ds[t], *args, **kwargs)
-            # Stack gradients for each period below each other
-            grad[(t*n_samples):((t+1)*n_samples), :] = grad_t
 
-        _, temp_grad = _evomap_temporal_cost_function(Y_all_periods, n_periods, weights, alpha, p, **kwargs)
+            # If necessary, drop exluded observations
+            full_grad_t = np.zeros_like(Y_t)
+            if not inclusions is None:
+                Y_t = Y_t[inclusions[t]==1,:]
+                D_t = Ds[t][inclusions[t] == 1,:][:,inclusions[t] == 1]
+                _, grad_t = static_cost_function(Y_t, D_t, *args, **kwargs, **static_cost_kwargs)
+                full_grad_t[inclusions[t]==1, :] = grad_t
+            else:
+                D_t = Ds[t]  
+
+                _, full_grad_t = static_cost_function(Y_t, D_t, *args, **kwargs, **static_cost_kwargs)
+
+
+
+
+            # Stack gradients for each period below each other
+            grad[(t*n_samples):((t+1)*n_samples), :] = full_grad_t
+
+        _, temp_grad = _evomap_temporal_cost_function(Y_all_periods, n_periods, weights, alpha, p, inclusions, **kwargs)
         grad += temp_grad
 
     else:
         grad = None
-    
+
     return cost, grad
 
 @jit(nopython=True)
@@ -444,8 +511,8 @@ def _calc_kth_order_dist_grad(n_periods, p):
     return partial_delta_k
 
 def _evomap_temporal_cost_function(
-    Y_all_periods, n_periods, weights, alpha, p, compute_error = True, 
-    compute_grad = True):
+    Y_all_periods, n_periods, weights, alpha, p, inclusions = None, 
+    compute_error = True, compute_grad = True):
     """ Calculate temporal component of EvoMap's cost function. 
 
     Parameters
@@ -454,12 +521,15 @@ def _evomap_temporal_cost_function(
         Map coordinates for all periods, stacked on top of each other.
     n_periods : int
         Number of periods.
-    weights : ndarray of shape (n_samples, n_periods, 1)
+    weights : ndarray of shape (n_samples, 1)
         Object-specific weights.
     alpha : float
         Hyperparameter alpha, controlling the strength of alignment.
     p : int
         Hyperparameter p, controlling the degree of smoothing.
+    inclusions: list of n_periods np.arrays of shape (n_samples)
+        Sequence of arrays with 0/1 entries indicating if an object should 
+        be included in the estimation
     compute_error : bool, optional
         True, if cost function value should be computed, by default True
     compute_grad : bool, optional
@@ -481,8 +551,17 @@ def _evomap_temporal_cost_function(
         error = 0
         
         for k in range(1, p+1):
-            error += alpha * np.sum(np.linalg.norm(weights * kth_order_dists[k], axis = 1)**2)
-            # Veriied with numerical example from paper!
+            for t in range(k, n_periods):
+                dist_kt = _get_positions_for_period(kth_order_dists[k], n_samples, t)
+                if not inclusions is None:
+                    inc_tk = inclusions[t].copy()
+                    # check if object was present in time t and k preceding periods
+                    for z in range(t,t-k-1,-1):
+                        inc_tk *= inclusions[z]
+                    dist_kt[inc_tk == 0,:] = 0
+                dist_kt = dist_kt * weights
+
+                error += alpha * np.sum(np.linalg.norm(dist_kt, axis = 1)**2)
             
     else:
         error = None
@@ -497,10 +576,11 @@ def _evomap_temporal_cost_function(
                 for tau in range(p+1):
                     if (t+tau) < n_periods:
                         dyn_grad += 2 * partial_delta_k[k][tau] * _get_positions_for_period(kth_order_dists[k], n_samples, t+tau)
+                        if not inclusions is None:
+                            dyn_grad[inclusions[t+tau] == 0,:] = 0
+            grad[(t*n_samples):((t+1)*n_samples), :] = dyn_grad * weights
 
-            grad[(t*n_samples):((t+1)*n_samples), :] = dyn_grad
-
-        grad = alpha * weights * grad 
+        grad = alpha * grad 
 
     else:
         grad = None

@@ -7,7 +7,7 @@ from scipy.spatial.distance import cdist
 from numba import jit
 from ._core import EvoMap
 from ._core import _evomap_cost_function, _get_positions_for_period
-from evomap.mapping._core import DivergingGradientError
+from evomap.mapping._optim import DivergingGradientError
 
 class EvoSammon(EvoMap):
 
@@ -21,7 +21,7 @@ class EvoSammon(EvoMap):
         init = None, 
         verbose = 0, 
         input_type = 'distance', 
-        maxhalves = 5, 
+        max_halves = 5, 
         tol = 1e-3,  
         n_inits = 1, 
         step_size = 1,
@@ -35,7 +35,7 @@ class EvoSammon(EvoMap):
         self.init = init
         self.verbose = verbose
         self.input_type = input_type
-        self.maxhalves = maxhalves
+        self.max_halves = max_halves
         self.tol = tol
         self.n_inits = n_inits
         self.step_size = step_size
@@ -47,7 +47,7 @@ class EvoSammon(EvoMap):
         return self
 
     def fit_transform(self, Xs):
-        from evomap.mapping._core import gradient_descent_line_search
+        from evomap.mapping._optim import gradient_descent_line_search
         from evomap.mapping._sammon import _sammon_stress_function, _check_prepare_input_sammon
         
         super()._validate_input(Xs)
@@ -89,7 +89,7 @@ class EvoSammon(EvoMap):
                 'n_iter': self.n_iter,
                 'n_iter_check': self.n_iter_check,
                 'step_size': self.step_size,
-                'maxhalves': self.maxhalves,
+                'max_halves': self.max_halves,
                 'min_grad_norm': self.tol,
                 'verbose': self.verbose,
                 'kwargs': {
@@ -119,7 +119,7 @@ class EvoSammon(EvoMap):
                     Ys.append(_get_positions_for_period(Y, n_samples, t))
                 self.Ys_ = Ys
                 self.cost_ = cost
-                self.cost_static_ = super()._calc_static_cost(
+                self.cost_static_, self.costs_static_ = super()._calc_static_cost(
                     Xs = Ds, Y_all_periods= Y, static_cost_function = _sammon_stress_function)
                 self.cost_static_avg_ = self.cost_static_ / n_periods    
                 best_cost = cost
