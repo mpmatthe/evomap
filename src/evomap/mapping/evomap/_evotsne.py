@@ -52,11 +52,11 @@ class EvoTSNE(EvoMap):
         self.max_tries = max_tries
         self.method_str = "EvoTSNE"
 
-    def fit(self, Xs):
-        self.fit_transform(Xs)
+    def fit(self, Xs, inclusions = None):
+        self.fit_transform(Xs, inclusions)
         return self
 
-    def fit_transform(self, Xs):
+    def fit_transform(self, Xs, inclusions = None):
         from evomap.mapping._optim import gradient_descent_with_momentum
         from evomap.mapping._tsne import _kl_divergence, _check_prepare_tsne
 
