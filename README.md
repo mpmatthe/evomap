@@ -1,4 +1,4 @@
-# evomap - A Python Toolbox for Mapping Evolving Relationship Data
+# evomap - A Toolbox for Dynamic Mapping in Python
 
 `evomap` offers a comprehensive toolbox to create, explore and analyze spatial representations ('maps') from relationship data. Common applications include Marketing (market structure analysis), Network Analysis (e.g., social, economic, or biological networks), Political Science, or High-Dimensional Data Analysis in general. 
 
@@ -20,7 +20,7 @@ To install `evomap` run
 pip install git+https://github.com/mpmatthe/evomap
 ```
 
-`evomap` requires Python version 3.7.1 (or higher). We recommend Python version 3.9 within a virtual environment, for instance via conda:
+`evomap` requires Python version 3.9. We recommend using Python within a virtual environment, for instance via conda:
 ```bash
 conda create -n evomap python=3.9
 conda activate evomap
