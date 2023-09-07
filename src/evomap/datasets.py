@@ -91,6 +91,16 @@ def load_tnic_sample_small():
 
     return df_tnic
 
+def load_tnic_sample_tech(unbalanced = False):
+    if unbalanced:
+        with resources.path('evomap.data.tnic_sample_tech', 'tnic_sample_technology_with_netflix.csv') as f:
+            df_tnic = pd.read_csv(f)
+    else:
+        with resources.path('evomap.data.tnic_sample_tech', 'tnic_sample_technology.csv') as f:
+            df_tnic = pd.read_csv(f)
+
+    return df_tnic
+
 
 def load_car_data():
     """ Load car dataset, containing perceptual and preference ratings of competing cars. 
