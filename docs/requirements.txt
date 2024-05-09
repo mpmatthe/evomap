@@ -1,4 +1,4 @@
-sphinx>=5.0
+sphinx==7.3.7
 myst-nb
 sphinx-autoapi
 sphinx-rtd-theme
