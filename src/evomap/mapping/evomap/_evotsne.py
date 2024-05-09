@@ -52,15 +52,15 @@ class EvoTSNE(EvoMap):
         self.max_tries = max_tries
         self.method_str = "EvoTSNE"
 
-    def fit(self, Xs, inclusions = None):
-        self.fit_transform(Xs, inclusions)
+    def fit(self, Xs):
+        self.fit_transform(Xs)
         return self
 
     def fit_transform(self, Xs, inclusions = None):
         from evomap.mapping._optim import gradient_descent_with_momentum
         from evomap.mapping._tsne import _kl_divergence, _check_prepare_tsne
 
-        super()._validate_input(Xs)
+        super()._validate_input(Xs, inclusions)
                 
         # Check and prepare input data
         n_periods = len(Xs)
@@ -111,6 +111,7 @@ class EvoTSNE(EvoMap):
                             'Ds': [P * self.early_exaggeration for P in Ps],
                             'alpha': self.alpha, 
                             'p': self.p,
+                            'inclusions': inclusions,
                             'weights' : W}}
 
                     Y, cost = gradient_descent_with_momentum(_evomap_cost_function, **opt_args)
@@ -125,6 +126,7 @@ class EvoTSNE(EvoMap):
                             'Ds': Ps,
                             'alpha': self.alpha, 
                             'p': self.p,
+                            'inclusions': inclusions,
                             'weights' : W}})
 
                     Y, cost = gradient_descent_with_momentum(_evomap_cost_function, **opt_args)              

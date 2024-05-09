@@ -1,5 +1,5 @@
 """
-Useful functions to evaluate maps.
+Module for evaluating maps.
 """
 
 import numpy as np
@@ -7,333 +7,342 @@ import pandas as pd
 from scipy.spatial.distance import squareform, pdist, cdist, cosine
 from scipy.stats import pearsonr
 
-def misalign_score(X_t, normalize = True):
-    """ Calculate misalignment of a sequence of maps.
-    
-    Misaligned is measured as the average Euclidean distance
-    between objects' subsequent map positions. The final score is averaged across
-    all objects.
+def misalign_score(X_t, normalize=True):
+    """
+    Calculate misalignment of a sequence of maps.
+
+    Misalignment is measured as the average Euclidean distance between objects' subsequent map positions.
+    The final score is averaged across all objects.
 
     Parameters
     ----------
-    Ys : list of ndarrays, each of shape (n_samples, d)
+    X_t : list of ndarrays, each of shape (n_samples, n_dims)
         Map coordinates.
     normalize : bool, optional
-        If true, misalignment is normalized by the average interobject distance 
-        on the map. Useful for comparing maps across differently scaled coordinate
-         systems, by default True.
+        If True, misalignment is normalized by the average interobject distance on the map.
+        Useful for comparing maps across differently scaled coordinate systems, by default True.
 
     Returns
     -------
     float
-        Misalignment score, bounded within [0, inf). 
+        Misalignment score, bounded within [0, inf).
         Lower values indicate better alignment.
     """
-    n_samples = X_t[0].shape[0]
-    misalignment = np.zeros(n_samples)
     n_periods = len(X_t)
+    if n_periods < 2:
+        raise ValueError("At least two maps are required to compute misalignment.")
+
+    misalignment = 0
     for t in range(1, n_periods):
-        X_this = X_t[t]
-        X_prev = X_t[t-1]
-        D = cdist(X_this, X_prev)
-        misalignment_t = np.diag(D)
+        distances = np.linalg.norm(X_t[t] - X_t[t-1], axis=1)
         if normalize:
-            misalignment_t = misalignment_t / np.mean(cdist(X_prev, X_prev))
+            normalization_factor = np.mean(pdist(X_t[t-1]))
+            distances /= normalization_factor if normalization_factor > 0 else 1
 
-        misalignment += misalignment_t
+        misalignment += np.mean(distances)
 
-    misalignment /= (n_periods-1)
-    return misalignment.mean()
+    misalignment /= (n_periods - 1)
+    return misalignment
 
 def align_score(X_t):
-    """ Calculate alignment of a sequence of maps.
-    
-    Alignment is measured as the mean cosine similarity of objects' subsequent 
-    map positions. The final score is averaged across all objects. 
+    """
+    Calculate alignment of a sequence of maps.
+
+    Alignment is measured as the mean cosine similarity of objects' subsequent
+    map positions. The final score is averaged across all objects. Cosine similarity
+    measures the cosine of the angle between two vectors, thus providing a scale-invariant
+    metric of similarity.
 
     Parameters
     ----------
-    Ys : list of ndarrays, each of shape (n_samples, d)
-        Map coordinates.
+    X_t : list of ndarray, each of shape (n_samples, n_dims)
+        Sequence of map coordinates.
 
     Returns
     -------
     float
-        Alignment score, bounded between [-1,1]. 
+        Alignment score, bounded between [-1,1].
         Higher values indicate better alignment.
     """
+    if len(X_t) < 2:
+        raise ValueError("At least two maps are required to compute alignment.")
 
-    mean_alignment = 0
-    n_samples = X_t[0].shape[0]
     n_periods = len(X_t)
+    n_samples = X_t[0].shape[0]
+    total_cosine_similarity = 0
+
     for t in range(1, n_periods):
         X_this = X_t[t]
         X_prev = X_t[t-1]
+        period_cosine_similarity = 0
+
         for i in range(n_samples):
-            mean_alignment += 1 - cosine(X_this[i, :], X_prev[i, :])
-    
-    mean_alignment /= n_samples
-    mean_alignment /= (n_periods-1)
+            # Compute the cosine similarity for each pair of vectors
+            # Note that 'cosine' function returns the cosine distance, so 1 - distance gives similarity
+            period_cosine_similarity += 1 - cosine(X_this[i, :], X_prev[i, :])
+
+        # Average cosine similarity across all samples for the current period
+        total_cosine_similarity += period_cosine_similarity / n_samples
+
+    # Average the total cosine similarity across all periods
+    mean_alignment = total_cosine_similarity / (n_periods - 1)
 
     return mean_alignment
 
-def hitrate_score(X, D, n_neighbors = 10, inc = None, input_format = 'dissimilarity'):
-    """ Calculate Hitrate of nearest neighbor recovery for a single map. The 
+def hitrate_score(X, D, n_neighbors=10, inc=None, input_format='dissimilarity'):
+    """
+    Calculate the Hitrate of nearest neighbor recovery for a single map. The 
     score is averaged across all objects. 
 
     Parameters
     ----------
-    D : ndarray
-        Input data, either a similarity / dissimilarity matrix of shape 
-        (n_samples, n_samples), or a matrix of feature vectors of shape (n_samples, d_input).
     X : ndarray of shape (n_samples, d)
         Map coordinates.
+    D : ndarray
+        Input data, either a similarity/dissimilarity matrix of shape 
+        (n_samples, n_samples), or a matrix of feature vectors of shape (n_samples, d_input).
     n_neighbors : int, optional
-        Number of neighbors considered when calculating the hitrate, by default 10
+        Number of neighbors considered when calculating the hitrate, by default 10.
     inc : ndarray of shape (n_samples,), optional
-        Inclusion array, indicating if an object is present (via 0 and 1s), by default None
+        Inclusion array, indicating if an object is present (via 0 and 1s), by default None.
     input_format : str, optional
-        One of 'vector', 'similarity', or 'dissimilarity', by default 'dissimilarity'
+        One of 'vector', 'similarity', or 'dissimilarity', indicating the type of the input D, by default 'dissimilarity'.
 
     Returns
     -------
     float
-        Hitrate of nearest neighbor recovery, bounded within [0,1]. 
+        Hitrate of nearest neighbor recovery, bounded within [0,1].
         Higher values indicate better recovery.
+
+    Raises
+    ------
+    ValueError
+        If the input dimensions mismatch or unsupported input format is provided.
     """
-    
-    hit_rate = 0
-    n_samples = X.shape[0]
-    if not X.shape[0] == D.shape[0]:
-        raise ValueError('Inconsistent array sizes.')
+    D = D.copy()
+    if n_neighbors < 1:
+        raise ValueError('Number of neighbors must be at least 1.')
     if not input_format in ['similarity', 'dissimilarity', 'vector']:
-        raise ValueError('Input type should be similarity, dissimilarity or vector.')
+        raise ValueError('Input format should be "vector", "similarity", or "dissimilarity".')
 
-    # Need to copy the matrix, else "np.fill_diagonal" will modify the original 
-    # one
-    D = D.copy() 
-    if input_format == 'vector':
-        # Turn X into a distance matrix
-        D = cdist(D,D)
-
-    if not inc is None:
-        if np.any(~np.logical_or(inc == 0, inc == 1)):
-            raise ValueError('Inclusions should only be 0 or 1.')
+    n_samples = X.shape[0]
+    if inc is not None:
         if len(inc) != n_samples:
-            raise ValueError('Incosistent array sizes.')
-        X = X[inc==1, :]
-        D = D[inc==1, :][:, inc == 1]
+            raise ValueError('Inclusion array size must match the number of samples in X.')
+        if np.any(~np.isin(inc, [0, 1])):
+            raise ValueError('Inclusion array must contain only 0 or 1 values.')
+        X = X[inc == 1, :]
+        D = D[inc == 1, :][:, inc == 1]
+        n_samples = X.shape[0]  # Update n_samples after applying inc
 
-    Dist_map = squareform(pdist(X, "sqeuclidean"))
+    if input_format == 'vector':
+        D = cdist(D, D)  # Compute distance matrix from feature vectors
 
-    # Make diagonal (self-dissimilarity) larger than any other dissimilarity 
-    # (thereby, an object never appears as its own nearest neighbor)
-    np.fill_diagonal(Dist_map, np.max(Dist_map)+1e8)
-    
-    if input_format == 'dissimilarity' or input_format == 'vector':
-        # X is a dissimilarity matrix
-        # Make diagonal (self-dissimilarity) larger than any other dissimilarity (thereby, an object never appears as its own nearest neighbor)
-        np.fill_diagonal(D, np.max(D)+1e8)
+    # Prepare distance matrix for hitrate calculation
+    if input_format in ['dissimilarity', 'vector']:
+        np.fill_diagonal(D, np.inf)  # Ensure no point is its own neighbor
+    else:  # 'similarity'
+        np.fill_diagonal(D, -np.inf)  # Ensure no point is its own neighbor
 
-        for i in range(n_samples):
-            # Sort i-th row of dissimilarity matrix (low-to-high)
-            nn_data = np.argsort(D[i,:])[:n_neighbors] 
-            nn_map = np.argsort(Dist_map[i, :])[:n_neighbors]
+    # Compute distances in the map space
+    Dist_map = squareform(pdist(X, 'sqeuclidean'))
+    np.fill_diagonal(Dist_map, np.inf)  # Similarly, ensure no point is its own neighbor
 
-            nn_intersec = [id for id in nn_data if id in nn_map]
-            hit_rate +=  len(nn_intersec)
+    hit_rate = 0
+    for i in range(n_samples):
+        # Find indices of the n_neighbors closest neighbors in both original and map spaces
+        if input_format in ['dissimilarity', 'vector']:
+            nearest_original = np.argsort(D[i, :])[:n_neighbors]
+        else:  # 'similarity'
+            nearest_original = np.argsort(-D[i, :])[:n_neighbors]
+        
+        nearest_map = np.argsort(Dist_map[i, :])[:n_neighbors]
 
-        hit_rate = hit_rate / (n_neighbors * n_samples)
+        # Calculate the intersection of the two neighbor lists
+        hit_rate += len(np.intersect1d(nearest_original, nearest_map))
 
-    elif input_format == 'similarity':
-        # X is a similarity matrix
-        # For similarities, make diagonal (= self similarities) smaller than any other similarity (see above)
-        np.fill_diagonal(D, 0)
-        for i in range(n_samples):
-            # Find max similarity (rather than min dissimilarity)
-            nn_data = np.argsort(D[i,:])[-n_neighbors:]
-            nn_map = np.argsort(Dist_map[i, :])[:n_neighbors]
+    return hit_rate / (n_neighbors * n_samples)
 
-            nn_intersec = [id for id in nn_data if id in nn_map]
-            hit_rate +=  len(nn_intersec)
-
-        hit_rate = hit_rate / (n_neighbors * n_samples)
-
-    return hit_rate
-
-def adjusted_hitrate_score(X, D, n_neighbors = 10, inc = None, input_format = 'dissimilarity'):
-    """ Calculate Hitrate of nearest neighbor recovery for a single map, adjusted
+def adjusted_hitrate_score(X, D, n_neighbors=10, inc=None, input_format='dissimilarity'):
+    """
+    Calculate the Hitrate of nearest neighbor recovery for a single map, adjusted
     for random agreement. The score is averaged across all objects.
-    
+
     Parameters
     ----------
     X : ndarray
-        Input data, either a similarity / dissimilarity matrix of shape 
+        Map coordinates, shape (n_samples, d).
+    D : ndarray
+        Input data, either a similarity/dissimilarity matrix of shape
         (n_samples, n_samples), or a matrix of feature vectors of shape (n_samples, d_input).
-    Y : ndarray of shape (n_samples, d)
-        Map coordinates.
     n_neighbors : int, optional
-        Number of neighbors considered when calculating the hitrate, by default 10
+        Number of neighbors considered when calculating the hitrate, by default 10.
     inc : ndarray of shape (n_samples,), optional
-        Inclusion array, indicating if an object is present (via 0 and 1s), by default None
+        Inclusion array, indicating if an object is present (via 0 and 1s), by default None.
     input_format : str, optional
-        One of 'vector', 'similarity', or 'dissimilarity', by default 'dissimilarity'
+        One of 'vector', 'similarity', or 'dissimilarity', by default 'dissimilarity'.
 
     Returns
     -------
     float
-        Adjusted Hitrate of nearest neighbor recovery, bounded within [0,1]. 
-        Higher values indicate better recovery.
+        Adjusted Hitrate of nearest neighbor recovery, bounded within [0,1].
+        Higher values indicate better recovery. Adjusted hitrate corrects the raw
+        hitrate by the expected hitrate due to chance.
+
+    Raises
+    ------
+    ValueError
+        If parameters are out of expected range or input dimensions mismatch.
     """
+    # First, calculate the raw hitrate score using the previously defined function
+    raw_hitrate = hitrate_score(X, D, n_neighbors, inc, input_format)
     
-    hitrate = hitrate_score(X = X, D = D, n_neighbors= n_neighbors, inc = inc, input_format=input_format)
-    n_samples = X.shape[0]
-    adj_hitrate = hitrate - n_neighbors / (n_samples -1)
-    return adj_hitrate
+    if inc is not None:
+        # Update n_samples to reflect the number of included samples
+        n_samples = len(X[inc == 1, :])
+    else:
+        n_samples = X.shape[0]
 
+    # Calculate the expected hitrate due to chance
+    expected_hitrate = n_neighbors / (n_samples - 1) # n-1 because the object itself cannot be a neighbor
 
-def avg_hitrate_score(X_t, D_t, n_neighbors = 10, inc_t = None, input_format = 'dissimilarity'):
-    """ Calculate average Hitrate of nearest neighbor recovery for a sequence of 
-    maps. The score is averaged across all maps within the sequence. 
+    # Adjust the hitrate by subtracting the expected hitrate due to chance
+    adjusted_hitrate = raw_hitrate - expected_hitrate
+
+    return adjusted_hitrate
+
+def avg_hitrate_score(X_t, D_t, n_neighbors=10, inc_t=None, input_format='dissimilarity'):
+    """
+    Calculate the average Hitrate of nearest neighbor recovery for a sequence of maps. 
+    The score is averaged across all maps within the sequence.
 
     Parameters
     ----------
-    Xs : list of ndarrays
-        Input data, either in the form of dissimilarity/similarity matrices, each of 
-        shape (n_samples, n_samples), or or feature vectors of shape (n_samples, d_input). 
-    Ys : list of ndarays, each of shape (n_samples, d)
-        _description_
+    X_t : list of ndarray
+        List of map coordinates for each time period, each of shape (n_samples, d).
+    D_t : list of ndarray
+        List of input data matrices for each time period, each either a similarity/dissimilarity 
+        matrix of shape (n_samples, n_samples), or a matrix of feature vectors of shape (n_samples, d_input).
     n_neighbors : int, optional
-        Number of neighbors considered when calculating the hitrate, by default 10
-    Inc_ts : list of ndarays, each of shape (n_samples,), optional
-        List of inclusion arrays, indicating if an object is present in a 
-        given period (via 0 and 1s), by default None
+        Number of neighbors considered when calculating the hitrate for each map, by default 10.
+    inc_t : list of ndarray, optional
+        List of inclusion arrays for each time period, each indicating if an object is present (via 0 and 1s), 
+        by default None. If provided, each should match the number of samples in the corresponding X and D.
     input_format : str, optional
-        One of 'vector', 'similarity', or 'distance', by default 'dissimilarity'
+        Specifies the input format of D_t, one of 'vector', 'similarity', or 'dissimilarity', by default 'dissimilarity'.
 
     Returns
     -------
     float
-        Average hitrate, bounded between [0,1]. Higher values indicate better recovery.
+        Average hitrate of nearest neighbor recovery, bounded between [0,1]. Higher values indicate better recovery.
+
+    Raises
+    ------
+    ValueError
+        If there are inconsistencies in array sizes or unsupported input format is specified.
     """
-    avg_hitrate = 0
+    if not X_t or not D_t or len(X_t) != len(D_t):
+        raise ValueError("List of map coordinates and data matrices must be non-empty and of equal length.")
+    if inc_t and len(inc_t) != len(X_t):
+        raise ValueError("Inclusion arrays, if provided, must match the number of map coordinate arrays.")
+
+    total_hitrate = 0
     n_periods = len(X_t)
+    
     for t in range(n_periods):
-        if inc_t is None:
-            inc = None
-        else:
-            inc = inc_t[t]
+        inc = inc_t[t] if inc_t else None
+        hit_rate = hitrate_score(X=X_t[t], D=D_t[t], n_neighbors=n_neighbors, inc=inc, input_format=input_format)
+        total_hitrate += hit_rate
 
-        avg_hitrate += hitrate_score(
-            X = X_t[t], 
-            D = D_t[t], 
-            n_neighbors = n_neighbors, 
-            inc = inc, 
-            input_format = input_format)
+    return total_hitrate / n_periods
 
-    avg_hitrate /= n_periods
-    return avg_hitrate
-
-def avg_adjusted_hitrate_score(X_t, D_t, n_neighbors = 10, inc_t = None, input_format = 'dissimilarity'):
-    """ Calculate average Hitrate of nearest neighbor recovery for a sequence of 
-    maps, adjusted for random agreement. The score is averaged across all 
-    maps within the sequence. 
+def avg_adjusted_hitrate_score(X_t, D_t, n_neighbors=10, inc_t=None, input_format='dissimilarity'):
+    """
+    Calculate the average Adjusted Hitrate of nearest neighbor recovery for a sequence of maps, 
+    adjusted for random agreement. The score is averaged across all maps within the sequence.
 
     Parameters
     ----------
-    Xs : list of ndarrays
-        Input data, either in the form of dissimilarity/similarity matrices, each of 
-        shape (n_samples, n_samples), or or feature vectors of shape (n_samples, d_input). 
-    Ys : list of ndarays, each of shape (n_samples, d)
-        _description_
+    X_t : list of ndarray
+        List of map coordinates for each time period, each of shape (n_samples, d).
+    D_t : list of ndarray
+        List of input data matrices for each time period, each either a similarity/dissimilarity 
+        matrix of shape (n_samples, n_samples), or a matrix of feature vectors of shape (n_samples, d_input).
     n_neighbors : int, optional
-        Number of neighbors considered when calculating the hitrate, by default 10
-    Inc_ts : list of ndarays, each of shape (n_samples,), optional
-        List of inclusion arrays, indicating if an object is present in a 
-        given period (via 0 and 1s), by default None
+        Number of neighbors considered when calculating the adjusted hitrate for each map, by default 10.
+    inc_t : list of ndarray, optional
+        List of inclusion arrays for each time period, each indicating if an object is present (via 0 and 1s), 
+        by default None. If provided, each should match the number of samples in the corresponding X and D.
     input_format : str, optional
-        One of 'vector', 'similarity', or 'dissimilarity', by default 'dissimilarity'
+        Specifies the input format of D_t, one of 'vector', 'similarity', or 'dissimilarity', by default 'dissimilarity'.
 
     Returns
     -------
     float
-        Average adjusted hitrate, bounded between [0,1]. Higher values 
-        indicate better recovery.
+        Average adjusted hitrate of nearest neighbor recovery, bounded between [0,1]. Higher values indicate better recovery.
+
+    Raises
+    ------
+    ValueError
+        If there are inconsistencies in array sizes or unsupported input format is specified.
     """
-    avg_adj_hitrate = 0
+    if not X_t or not D_t or len(X_t) != len(D_t):
+        raise ValueError("List of map coordinates and data matrices must be non-empty and of equal length.")
+    if inc_t and len(inc_t) != len(X_t):
+        raise ValueError("Inclusion arrays, if provided, must match the number of map coordinate arrays.")
+
+    total_adjusted_hitrate = 0
     n_periods = len(X_t)
+    
     for t in range(n_periods):
-        if inc_t is None:
-            inc = None
-        else:
-            inc = inc_t[t]
+        inc = inc_t[t] if inc_t else None
+        adjusted_hit_rate = adjusted_hitrate_score(X=X_t[t], D=D_t[t], n_neighbors=n_neighbors, inc=inc, input_format=input_format)
+        total_adjusted_hitrate += adjusted_hit_rate
 
-        avg_adj_hitrate += adjusted_hitrate_score(
-            X = X_t[t], 
-            D = D_t[t], 
-            n_neighbors = n_neighbors, 
-            inc = inc_t, 
-            input_format = input_format)
-
-    avg_adj_hitrate /= n_periods
-    return avg_adj_hitrate
+    return total_adjusted_hitrate / n_periods
 
 def persistence_score(X_t):
-    """ Calculate persistence of a sequence of maps as the average Pearson 
-    correlation coefficient between objects' subsequent map movements (i.e., the
-    first differences of their map positions). The score is averaged across all
-    objects. 
+    """
+    Calculate persistence of a sequence of maps as the average Pearson correlation coefficient 
+    between objects' subsequent map movements (i.e., the first differences of their map positions). 
+    The score is averaged across all objects.
 
     Parameters
     ----------
-    Ys : list of ndarrays, each of shape (n_samples, 2)
-        Map coordinates. 
+    X_t : list of ndarrays, each of shape (n_samples, n_dims)
+        Sequence of map coordinates. Each ndarray represents a map at a different time.
 
     Returns
     -------
     float
-        Persistence score, bounded within (-1,1). 
-        Higher positive values indicate higher persistence.
+        Persistence score, bounded within (-1,1).
+        Higher positive values indicate higher persistence of map movements across time periods.
 
+    Raises
+    ------
+    ValueError
+        If fewer than two maps are provided or if maps do not have consistent dimensions.
     """
+    if len(X_t) < 2:
+        raise ValueError("Persistence can only be computed for a sequence of at least two maps.")
     
-    if len(X_t) < 3:
-        raise ValueError("Persistence can only be computed for a sequence of at least three maps.")
+    # Calculate first differences between consecutive maps
+    deltas = np.diff(X_t, axis=0)
 
-    else:
-        # Define labels for easier data manipulation 
-        labels = [str(i) for i in range(len(X_t[0]))]
+    # Calculate correlation of these differences from one time step to the next
+    n_periods = len(X_t) - 1  # Number of periods with valid differences
+    correlations = []
 
-        df_delta = pd.DataFrame(columns = ['label', 'x', 'y','t'])
-        
-        def calc_diffs(df):
-            """ Caluclate first differences in map positions. Leaves NAs 
-            in the first row for each label (at time t = 0).
-            """
-            df[['x_diff', 'y_diff']] = df[['x', 'y']].diff()
-            df[['x_diff_prev', 'y_diff_prev']] = df[['x_diff', 'y_diff']].shift()
-            return df
-
-        for t in range(len(X_t)):
-            if X_t[t].shape[1] != 2:
-                raise ValueError("Persistence metric is only implemented for 2D map coordinates. Will be extended in a future version.")
-
-            df_delta_t = pd.DataFrame()
-            df_delta_t['label'] = labels
-            df_delta_t['x'] = X_t[t][:,0]
-            df_delta_t['y'] = X_t[t][:,1]
-            df_delta_t['t'] = t
-            df_delta = pd.concat([df_delta, df_delta_t], axis = 0, sort = True)
-
-        df_delta.index = range(len(df_delta))
-        df_delta = df_delta.groupby('label').apply(calc_diffs)
-        # Drop NAs in first period where no differences can be calculated
-        df_delta = df_delta.dropna(axis = 0, subset = ['x_diff_prev', 'y_diff_prev'])
-
-        if np.sum((df_delta['x_diff_prev'] - df_delta['x_diff'])**2) <= 1e-12:
-            print("Warning: Map positions completly static, thus Persistence cannot be calculated!")
-            return np.nan
+    for d in range(deltas.shape[2]):  # Iterate over each dimension
+        # Flatten the differences in this dimension for all samples across all periods
+        flat_deltas = deltas[:, :, d].flatten()
+        if np.all(flat_deltas == 0):
+            # If there is no change in this dimension, treat the persistence as perfect
+            correlations.append(1.0)
         else:
-            x_corr = pearsonr(df_delta['x_diff_prev'] , df_delta['x_diff'])[0]
-            y_corr = pearsonr(df_delta['y_diff_prev'] , df_delta['y_diff'])[0]
-        return ((x_corr+y_corr)/2)
+            # Calculate the Pearson correlation between consecutive periods
+            corr, _ = pearsonr(flat_deltas[:-X_t[0].shape[0]], flat_deltas[X_t[0].shape[0]:])
+            correlations.append(corr)
+
+    # Average the correlations across all dimensions to get the overall persistence score
+    return np.mean(correlations)

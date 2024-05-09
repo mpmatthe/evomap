@@ -80,8 +80,6 @@ class EvoMap():
         n_samples = Xs[0].shape[0]
         n_periods = len(Xs)
         if self.init is None:
-#            init = np.random.normal(0,.1,(n_samples, self.n_dims))
-#            init = np.concatenate([init]*n_periods, axis = 0)
             init_t = np.zeros((0, self.n_dims))
             for t in range(n_periods):
                 init = np.random.normal(0,.1,(n_samples, self.n_dims))
@@ -109,6 +107,13 @@ class EvoMap():
         for t in range(1,n_periods):
             if Xs[t].shape != Xs[t-1].shape:
                 raise ValueError('Unequal shaped input data!') 
+            
+            if np.any(np.isnan(Xs[0])):
+                raise ValueError('Input contains NaN values')
+
+            if np.any(Xs[0]==np.inf):
+                raise ValueError('Input contains Inf values')
+            
         n_samples = Xs[0].shape[0]
         
         if not inclusions is None:

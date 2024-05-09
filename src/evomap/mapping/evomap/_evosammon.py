@@ -42,15 +42,15 @@ class EvoSammon(EvoMap):
         self.max_tries = max_tries
         self.method_str = "EvoSammon"
 
-    def fit(self, Xs, inclusions = None):
-        self.fit_transform(Xs, inclusions)
+    def fit(self, Xs):
+        self.fit_transform(Xs)
         return self
 
     def fit_transform(self, Xs, inclusions = None):
         from evomap.mapping._optim import gradient_descent_line_search
         from evomap.mapping._sammon import _sammon_stress_function, _check_prepare_input_sammon
         
-        super()._validate_input(Xs)
+        super()._validate_input(Xs, inclusions)
 
         # Check and prepare input data
         n_periods = len(Xs)
@@ -97,6 +97,7 @@ class EvoSammon(EvoMap):
                     'Ds': Ds,
                     'alpha': self.alpha, 
                     'p': self.p,
+                    'inclusions': inclusions,
                     'weights' : W}
             }
 
