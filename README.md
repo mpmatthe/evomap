@@ -9,7 +9,7 @@ Often, relationship data is retrievable over time, as markets and networks tend 
 - evaluation
 - plotting
 
-Note: As of now, `evomap` is available as a ***pre-release version*** and parts of `evomap` are still under active development. For any bug reports or feature requests, <a href = 'mailto:matthe@wiwi.uni-frankfurt.de'>please get in touch</a>.
+Note: As of now, `evomap` is available as a ***pre-release version*** and parts of `evomap` are still under active development. For any bug reports or feature requests, <a href = 'mailto:mpmatthe@iu.edu'>please get in touch</a>.
 
 ## Installation
 
