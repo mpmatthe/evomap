@@ -7,7 +7,7 @@
 # -- Project information -----------------------------------------------------
 
 project = u"evomap"
-copyright = u"2022, Maximilian Matthe"
+copyright = u"2023, Maximilian Matthe"
 author = u"Maximilian Matthe"
 
 # -- General configuration ---------------------------------------------------
@@ -21,6 +21,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
 ]
+autoapi_type = 'python'
 autoapi_dirs = ["../src"]
 
 nbsphinx_timeout = -1
