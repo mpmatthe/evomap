@@ -1,13 +1,18 @@
 # Required
 version: 2
 
-# Image to use
+# Build Environment
 build:
-  image: testing
+  os: "ubuntu-20.04"
+  tools: 
+    python: "3.9"
+    sphinx: "5.0" 
 
-# Configuration
+sphinx:
+  configuration: docs/conf.py
+
+# Python configuration
 python:
-  version: 3.9
   install:
     - requirements: docs/requirements.txt
     - method: pip
