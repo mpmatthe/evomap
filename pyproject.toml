@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "evomap"
-version = "0.2.0"
+version = "0.3.0"
 description = "A Python Toolbox for Mapping Evolving Relationship Data"
 authors = ["Maximilian Matthe <mpmatthe@iu.edu>, Daniel M. Ringel <>, and Bernd Skiera <>"]
 license = "MIT"
