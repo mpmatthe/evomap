@@ -1,4 +1,5 @@
 myst-nb
 sphinx-autoapi
 sphinx-rtd-theme
+sphinx>=5.0
 setuptools
