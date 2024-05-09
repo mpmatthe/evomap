@@ -40,5 +40,3 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 #
 html_theme = "sphinx_book_theme"
 
-import pkg_resources
-pkg_resources.require("Sphinx>=5.0")
