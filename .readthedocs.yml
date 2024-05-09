@@ -4,6 +4,7 @@ version: 2
 # Image to use
 build:
   image: testing
+  os: "ubuntu-20.04"
 
 # Configuration
 python:
