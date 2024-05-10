@@ -13,18 +13,18 @@ Note: As of now, `evomap` is available as a ***pre-release version*** and parts 
 
 ## Installation
 
-This pre-release is available via GitHub. Stay tuned for a release on PyPi, which is coming soon! 
+This pre-release is available via PyPi. 
 
 To install `evomap` run
 ```bash
 pip install git+https://github.com/mpmatthe/evomap
 ```
 
-`evomap` requires Python version 3.9. We recommend using Python within a virtual environment, for instance via conda:
+`evomap` works best with Python version 3.9. We recommend using Python within a virtual environment, for instance via conda:
 ```bash
 conda create -n evomap python=3.9
 conda activate evomap
-pip install git+https://github.com/mpmatthe/evomap
+pip install evomap
 ```
 
 **Note:** Currently, `evomap` builds its C extensions upon installation on the system. Thus, it requires a C compiler to be present. The right C compiler depends upon your system, e.g. GCC on Linux or MSVC on Windows. For details, see <a href = 'https://cython.readthedocs.io/en/latest/src/quickstart/install.html'>the Cython documentation</a>. In future versions, extensions will be pre-compiled.
