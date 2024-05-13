@@ -407,14 +407,14 @@ def draw_dynamic_map(X_t, color_t=None, size_t=None, incl_t=None, label = None, 
             ax.scatter(X_t[t][valid_indices, 0], X_t[t][valid_indices, 1], alpha=transparency, s=sizes[valid_indices], 
                     c=colors[valid_indices], **scatter_args)
 
-            if show_arrows and t > 0:
-                for i in range(n_samples):
-                    if incl_t[t][i] and incl_t[t-1][i]:
-                        start_point = X_t[t-1][i]
-                        end_point = X_t[t][i]
-                        if not np.array_equal(start_point, end_point):
-                            ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]],
-                                    color='gray', alpha=transparency_start, linewidth=1)
+        if show_arrows and t > 0:
+            for i in range(n_samples):
+                if incl_t[t][i] and incl_t[t-1][i]:
+                    start_point = X_t[t-1][i]
+                    end_point = X_t[t][i]
+                    if not np.array_equal(start_point, end_point):
+                        ax.plot([start_point[0], end_point[0]], [start_point[1], end_point[1]],
+                                color='gray', alpha=transparency, linewidth=1)
 
             if label is not None and t == n_periods - 1:  # Check explicitly if label is not None
                 for i, txt in enumerate(label):
@@ -446,9 +446,9 @@ def plot_data(X, colors, sizes, inclusions, labels, transparency_start, transpar
             if valid_indices[i]:
                 ax.text(X[i, 0], X[i, 1], txt, fontsize=DEFAULT_FONT_SIZE)
 
-def draw_trajectories(Y_ts, labels, selected_labels = None, title = None, 
+def draw_trajectories(Y_ts, labels, selected_labels = None, 
     show_axes = False, show_box = True, show_grid = False, axes_at_origin = False,
-    annotate_periods = True, period_labels = None, ax = None, fig_size = None):
+    annotate_periods = True, period_labels = None, fig_size = None, **kwargs):
     """ Draw the trajectories of selected objects.
 
     Parameters
@@ -477,14 +477,13 @@ def draw_trajectories(Y_ts, labels, selected_labels = None, title = None,
     if selected_labels == None:
         selected_labels = labels
 
-    # If not ax is provided, return the whole FIgure. Else, only draw the plot on the provided axes
+    ax = kwargs.get('ax')
     if ax is None:
+        fig, ax = plt.subplots(figsize=kwargs.get('fig_size', (6,6)))
         return_fig = True
-        if fig_size is None:
-            fig_size = (7,7)
-        fig, ax = plt.subplots(figsize = fig_size)
     else:
-        return_fig = False  
+        fig = ax.figure
+        return_fig = False
 
     annotations = []
 
@@ -522,9 +521,6 @@ def draw_trajectories(Y_ts, labels, selected_labels = None, title = None,
         ax.plot(xs, ys, c = c_line, alpha = .4)
 
     style_axes(ax = ax, show_axes= show_axes, show_box = show_box, show_grid = show_grid, axes_at_origin = axes_at_origin)
-
-    if not title is None:
-        ax.set_title(title, fontdict = title_fontdict)
 
     if not return_fig:
         plt.close(fig)
