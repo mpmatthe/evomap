@@ -17,7 +17,7 @@ This pre-release is available via PyPi.
 
 To install `evomap` run
 ```bash
-pip install git+https://github.com/mpmatthe/evomap
+pip install evomap
 ```
 
 `evomap` works best with Python version 3.9. We recommend using Python within a virtual environment, for instance via conda:
