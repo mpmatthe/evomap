@@ -18,17 +18,13 @@ package_data = \
 {'': ['*']}
 
 install_requires = \
-['Cython>=0.29.33,<0.30.0',
- 'ipykernel>=6.13.0',
- 'matplotlib>=3.5.1',
- 'numba>=0.55.1,<0.56.0',
- 'numpy==1.21.6',
- 'pandas==1.3.3',
- 'scipy>=1.7.0',
- 'seaborn>=0.11.2',
- 'setuptools>=67.4.0,<68.0.0',
- 'sphinx-book-theme>=0.3.2,<0.4.0',
- 'statsmodels>=0.13.2,<0.14.0']
+['matplotlib',
+ 'numba',
+ 'numpy',
+ 'pandas',
+ 'scipy',
+ 'seaborn',
+ 'statsmodels']
 
 setup_kwargs = {
     'name': 'evomap',
@@ -44,9 +40,7 @@ setup_kwargs = {
     'packages': packages,
     'package_data': package_data,
     'install_requires': install_requires,
-    'python_requires': '>=3.7.1,<3.11',
+    'python_requires': '>=3.8',
 }
-from build import *
-build(setup_kwargs)
 
 setup(**setup_kwargs)
