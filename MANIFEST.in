@@ -1,0 +1,1 @@
+recursive-include src/evomap/data *.csv *.xlsx *.npy __init__.py
