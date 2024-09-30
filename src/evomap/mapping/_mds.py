@@ -7,6 +7,8 @@ from numba import jit
 from ._optim import gradient_descent_line_search
 from ._cmds import CMDS
 import statsmodels.api as sm
+from sklearn.linear_model import LinearRegression
+from ._regression import IsotonicRegression
 
 EPSILON = 1e-10
 
@@ -97,9 +99,6 @@ class MDS():
 
         return self.Y_
 
-from sklearn.isotonic import IsotonicRegression
-from sklearn.linear_model import LinearRegression
-
 def _normalized_stress_function(
     positions, disparities, mds_type = None, compute_error = True, 
     compute_grad = True):
@@ -183,6 +182,7 @@ def _normalized_stress_function(
 
         # Rebuild matrix of (fitted) disparities
         disp_hat = rebuild_matrix(disp_hat, n_samples)
+
     else:
         raise ValueError("Unknown MDS type {0}!".format(mds_type))
     
