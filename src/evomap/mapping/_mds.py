@@ -97,6 +97,12 @@ class MDS():
                 self.cost_ = cost
                 best_cost = cost
 
+        # Enforce consistent signs of coordinates
+        for dim in range(n_dims):
+            # Check the sign of the first element in the dimension
+            if self.Y_[0, dim] > 0:
+                self.Y_[:, dim] *= -1
+
         return self.Y_
 
 def _normalized_stress_function(
