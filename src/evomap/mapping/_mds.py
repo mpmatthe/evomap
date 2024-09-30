@@ -70,6 +70,7 @@ class MDS():
                     print("[{0}] Initialization {1}/{2}".format(self.method_str,i+1, self.n_inits))
 
             if self.init is None:
+                np.random.seed(0)
                 init = np.random.normal(0,.1,(n_samples, n_dims))
             elif type(self.init) == str and self.init == "cmds":
                 init = CMDS().fit_transform(D)
