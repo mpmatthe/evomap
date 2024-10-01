@@ -15,7 +15,7 @@ class CMDS():
         self.n_dims = 2
     
     @staticmethod
-    def _cmdscale(D, n_dims):
+    def _cmdscale(D, n_dims, eps=1e-16):
         """                                                                                       
         Classical multidimensional scaling (MDS)                                                  
                                                                                                 
@@ -69,7 +69,7 @@ class CMDS():
         L = np.diag(np.sqrt(positive_evals))
         Y = positive_evecs.dot(L)
     
-        return Y, positive_evals
+        return np.round(Y, -int(np.log10(eps))), positive_evals
 
     def fit(self, X):
         self.Y_, _ = self._cmdscale(X, self.n_dims)
