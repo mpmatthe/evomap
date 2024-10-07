@@ -7,7 +7,7 @@
 # -- Project information -----------------------------------------------------
 
 project = u"evomap"
-copyright = u"2023, Maximilian Matthe"
+copyright = u"2024, Maximilian Matthe"
 author = u"Maximilian Matthe"
 
 # -- General configuration ---------------------------------------------------
@@ -26,7 +26,7 @@ autoapi_dirs = ["../src"]
 
 nbsphinx_timeout = -1
 nb_execution_timeout = -1
-nb_execution_mode = "off"
+nb_execution_mode = "force"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
