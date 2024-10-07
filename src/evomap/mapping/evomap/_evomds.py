@@ -8,6 +8,9 @@ from numba import jit
 from ._core import EvoMap
 from ._core import _evomap_cost_function, _get_positions_for_period
 from evomap.mapping._optim import DivergingGradientError
+import inspect 
+from evomap.mapping._optim import gradient_descent_line_search
+from evomap.mapping._mds import _normalized_stress_function
 
 class EvoMDS(EvoMap):
 
@@ -44,15 +47,75 @@ class EvoMDS(EvoMap):
         self.max_tries = max_tries
         self.method_str = "EvoMDS"
 
+    def __str__(self):
+        """Return a string representation of the EvoMDS instance with key parameters and user-modified values."""
+        # Get the signature of the __init__ method
+        signature = inspect.signature(self.__init__)
+        
+        # Get the default values of the parameters from the __init__ method
+        defaults = {k: v.default for k, v in signature.parameters.items() if v.default is not inspect.Parameter.empty}
+        
+        # Always show key parameters
+        result = f"EvoMDS(alpha={self.alpha}, p={self.p}, mds_type={self.mds_type}, input_type={self.input_type})"
+        
+        # Collect all attributes that differ from the default
+        modified_params = []
+        for attr, default_val in defaults.items():
+            current_val = getattr(self, attr)
+            if current_val != default_val and attr not in ["alpha", "p", "mds_type", "input_type"]:
+                modified_params.append(f"{attr}={current_val}")
+        
+        # If any attributes were changed, append them to the result
+        if modified_params:
+            result += "\nUser-modified attributes: " + ", ".join(modified_params)
+        
+        return result
+
     def fit(self, Xs, inclusions = None):
+        """Fit the EvoMDS model to the input data over multiple periods.
+
+        Parameters
+        ----------
+        Xs : list of np.ndarray
+            A list of input matrices, where each matrix corresponds to one period. 
+            The input matrices can either be feature vectors or distance matrices, 
+            depending on the `input_type`.
+        inclusions : np.ndarray, optional
+            Binary array indicating which points are included in the calculation, 
+            by default None.
+
+        Returns
+        -------
+        self : object
+            Returns the instance of the EvoMDS class with the configuration matrix 
+            `Ys_` stored as an attribute.
+        """
         self.fit_transform(Xs, inclusions)
         return self
 
     def fit_transform(self, Xs, inclusions = None):
-        from evomap.mapping._optim import gradient_descent_line_search
-        from evomap.mapping._mds import _normalized_stress_function
+        """Fit the EvoMDS model and return the transformed coordinates.
 
-                
+        Parameters
+        ----------
+        Xs : list of np.ndarray
+            A list of input matrices, where each matrix corresponds to one period. 
+            The input matrices can either be feature vectors or distance matrices, 
+            depending on the `input_type`.
+        inclusions : np.ndarray, optional
+            Binary array indicating which points are included in the calculation, 
+            by default None.
+
+        Returns
+        -------
+        list of np.ndarray
+            The transformed coordinates for each period, stored as a list of matrices.
+        
+        Raises
+        ------
+        ValueError
+            If the `input_type` is not 'distance' or 'vector'.
+        """                        
         # Check and prepare input data
         super()._validate_input(Xs, inclusions)
 

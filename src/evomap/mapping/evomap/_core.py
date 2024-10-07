@@ -76,7 +76,6 @@ class EvoMap():
         ndarray of shape(n_samples * n_periods, n_dims)
             Initialized starting positions.
         """
-
         n_samples = Xs[0].shape[0]
         n_periods = len(Xs)
         if self.init is None:
@@ -345,12 +344,7 @@ def _evomap_cost_function(
     n_samples = Ds[0].shape[0]
     n_dims = Y_all_periods.shape[1]
 
-
-#    for t in range(n_periods):
-#        Y_t = Y_all_periods[(t*n_samples):((t+1)*n_samples), :]
-
-    if compute_error:
-        
+    if compute_error:   
         # Add all static cost values
         cost = 0
         kwargs.update({'compute_grad': False, 'compute_error': True})
@@ -395,9 +389,6 @@ def _evomap_cost_function(
                 D_t = Ds[t]  
 
                 _, full_grad_t = static_cost_function(Y_t, D_t, *args, **kwargs, **static_cost_kwargs)
-
-
-
 
             # Stack gradients for each period below each other
             grad[(t*n_samples):((t+1)*n_samples), :] = full_grad_t

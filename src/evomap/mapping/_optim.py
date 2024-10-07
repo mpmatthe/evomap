@@ -2,7 +2,6 @@
 Core functions shared within mapping module. Mostly related to different
 optimization routines implemented and adjusted for mapping. 
 """
-
 import numpy as np
 EPSILON = 1e-12
 
@@ -26,45 +25,60 @@ def gradient_descent_line_search(
     method_str = "",
     args = None,
     kwargs = None):
-    """ Gradient descent with backtracking via halving. 
+    """Gradient descent optimization with backtracking line search via halving.
 
-    Optimizes the objective function iteratively. At each step, a halving
-    procedure is used to ensure that step sizes are set such that cost values
-    decrease. 
+    This function performs gradient descent optimization to minimize the objective 
+    function, using a backtracking line search to adaptively adjust the 
+    step size. 
 
     Parameters
     ----------
     objective : callable
-        Function to be optimized. Expected to return the function value and the
-        gradient when called. See examples for exact syntax. 
+        The objective function to be minimized. It should return both the cost 
+        (value) and the gradient when called. The function signature is expected 
+        to be `objective(Y, *args, **kwargs)` where `Y` is the current map 
+        coordinates and `args` and `kwargs` are additional arguments.
     init : ndarray of shape (n_samples, n_dims)
-        Starting initialization.
+        The initial starting point for the optimization (e.g., initial coordinates).
     n_iter : int
-        Total number of gradient descent iterations.
+        The total number of gradient descent iterations to perform.
     n_iter_check : int, optional
-        Interval in which cost values are reported, by default 1
+        The frequency at which the progress of the optimization is reported, 
+        by default 50.
     max_halves : int, optional
-        Maximum number of halving steps in line search, by default 10
-    step_size : int, optional
-        Initial step size, by default 1
+        The maximum number of times to halve the step size during backtracking, 
+        by default 10.
+    step_size : float, optional
+        The initial step size for the gradient descent updates, by default 1.
     min_grad_norm : float, optional
-        Error tolerance, by default 1e-7
+        The tolerance level for stopping the optimization based on the gradient 
+        norm, by default 1e-7.
     verbose : int, optional
-        Level of verbosity, by default 0
+        The verbosity level of the function's output:
+        - 0: No output
+        - 1: Only final status messages
+        - 2: Detailed iteration-by-iteration progress, by default 0.
     method_str : str, optional
-        Method label, by default ""
+        A string to identify the method, useful for logging and output messages, 
+        by default "" (empty string).
     args : list, optional
-        Arguments passed to the objective function, by default None
+        Additional positional arguments passed to the objective function, 
+        by default None.
     kwargs : dict, optional
-        Keyword arguments passed to the objective function, by default None
+        Additional keyword arguments passed to the objective function, 
+        by default None.
 
     Returns
     -------
     ndarray of shape (n_samples, n_dims)
-        Final map coordinates
-
+        The optimized map coordinates (final positions in the reduced space).
     float
-        Final cost function value
+        The final value of the cost function after optimization.
+
+    Raises
+    ------
+    DivergingGradientError
+        If the gradient norm becomes excessively large, indicating divergence.
     """
     import numpy as np
     if args is None:
@@ -136,64 +150,78 @@ def gradient_descent_with_momentum(objective,
     method_str = "",
     args = None,
     kwargs = None):
-    """ Gradient descent with momentum.
+    """Gradient descent optimization with momentum.
 
-    Optimize the objective function using momentum-based gradient descent, 
-    as used, for instance, in t-SNE.
+    This function performs gradient descent with momentum to optimize an objective 
+    function. 
 
     Parameters
     ----------
     objective : callable
-        Function to be optimized. Expected to return the function value and the
-        gradient when called. See examples for exact syntax. 
+        The objective function to be minimized. It should return both the cost 
+        (value) and the gradient when called. The function signature is expected 
+        to be `objective(Y, *args, **kwargs)` where `Y` is the current map 
+        coordinates and `args` and `kwargs` are additional arguments.
     init : ndarray of shape (n_samples, n_dims)
-        _description_
+        The initial starting point for the optimization (e.g., initial coordinates).
     n_iter : int
-        Total number of gradient descent iterations.
+        The total number of gradient descent iterations to perform.
     start_iter : int, optional
-        Startint iteration, if optimization (re-)starts at a later stage
-        , by default 0
+        The starting iteration, useful for resuming optimization from a certain 
+        point, by default 0.
     n_iter_check : int, optional
-        Interval in which cost values are reported, by default 50
+        The frequency at which the progress of the optimization is reported, 
+        by default 50.
     momentum : float, optional
-        Momentum factor, by default .8
-    eta : int, optional
-        Learning rate, by default 50
+        The momentum factor that determines how much of the previous step's 
+        velocity is retained. Higher values increase momentum, by default 0.8.
+    eta : float, optional
+        The learning rate, or step size, that controls how much the parameters 
+        are adjusted in each iteration, by default 50.
     min_grad_norm : float, optional
-        Error tolerance, by default 1e-7
+        The tolerance level for stopping the optimization based on the gradient 
+        norm, by default 1e-7.
     verbose : int, optional
-        Level of verbosity, by default 0
+        The verbosity level of the function's output:
+        - 0: No output
+        - 1: Only final status messages
+        - 2: Detailed iteration-by-iteration progress, by default 0.
     method_str : str, optional
-        Method label, by default ""
+        A string to identify the method, useful for logging and output messages, 
+        by default "" (empty string).
     args : list, optional
-        Arguments passed to the objective function, by default None
+        Additional positional arguments passed to the objective function, 
+        by default None.
     kwargs : dict, optional
-        Keyword arguments passed to the objective function, by default None
+        Additional keyword arguments passed to the objective function, 
+        by default None.
 
     Returns
     -------
     ndarray of shape (n_samples, n_dims)
-        Final map coordinates
-
+        The optimized map coordinates (final positions in the reduced space).
     float
-        Final cost function value
-    """
+        The final value of the cost function after optimization.
 
+    Raises
+    ------
+    DivergingGradientError
+        If the gradient norm becomes excessively large, indicating divergence.
+    """
     if args is None:
         args = []
     if kwargs is None:
         kwargs = {}
 
-    #------------- Initialize Optimization Variables ---------------------#
-
+    # Initialize Optimization Variables
     Y =  init.copy()
-    iY = np.zeros_like(Y)        # Step sizes
+    iY = np.zeros_like(Y)
     gains = np.ones_like(Y)
 
     if verbose > 1:
         print("[{0}] Gradient descent with Momentum: {1}".format(method_str, momentum))
 
-    #------------- Run Gradient Descent ---------------------#
+    # Run Gradient Descent
     for iter in range(start_iter, n_iter):
 
         report_progress = (iter + 1) % n_iter_check == 0
@@ -234,21 +262,21 @@ def gradient_descent_with_momentum(objective,
 
     return Y, error
 
-
-
 def report_optim_progress(iter, method_str, cost, grad_norm = None):
-    """Print optimization progress. 
+    """Print the progress of the optimization during iterative updates.
 
     Parameters
     ----------
     iter : int
-        Current iteration.
+        The current iteration of the optimization process.
     method_str : str
-        Method label. 
+        A string identifier for the method being used, useful for logging 
+        or distinguishing between different optimization methods.
     cost : float
-        Current cost function value
+        The current value of the cost function being minimized.
     grad_norm : float, optional
-        Gradient norm, by default None
+        The norm of the gradient at the current iteration, by default None. 
+        If provided, it is displayed in the progress report.
     """
     if cost < 1e3:
         outstr = "[{0}] Iteration {1} -- Cost: {2:.2f}".format(
@@ -256,7 +284,6 @@ def report_optim_progress(iter, method_str, cost, grad_norm = None):
     else:
         outstr = "[{0}] Iteration {1} -- Cost: {2:.2e}".format(
             method_str, iter+1, cost)
-
 
     if not grad_norm is None:
         if grad_norm < 1e3:

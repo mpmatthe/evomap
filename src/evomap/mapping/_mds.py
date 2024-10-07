@@ -6,9 +6,9 @@ from scipy.spatial.distance import cdist
 from numba import jit
 from ._optim import gradient_descent_line_search
 from ._cmds import CMDS
-import statsmodels.api as sm
 from sklearn.linear_model import LinearRegression
 from ._regression import IsotonicRegression
+import inspect
 
 EPSILON = 1e-10
 
@@ -42,12 +42,80 @@ class MDS():
         self.step_size = step_size
         self.method_str = "MDS"
 
+    def __str__(self):
+        """Create a string representation of the MDS instance. Displays the key attributes and 
+        all parameters modified by the user.
+
+        Returns
+        -------
+        str
+            A summary of the key attributes of this MDS object, including modified parameters.
+        """
+        # Initial part of the output with always-displayed attributes
+        result = f"MDS Type: {self.mds_type}, Input Type: {self.input_type}"
+
+        # Get the signature of the __init__ method
+        signature = inspect.signature(self.__init__)
+        
+        # Get the default values of the parameters from the __init__ method
+        defaults = {k: v.default for k, v in signature.parameters.items() if v.default is not inspect.Parameter.empty}
+
+        # Collect all attributes that differ from the default
+        changed_attrs = []
+        for attr, default_val in defaults.items():
+            current_val = getattr(self, attr)
+            if current_val != default_val:
+                changed_attrs.append(f"{attr}={current_val}")
+        
+        # If any attributes were changed, append them to the result
+        if changed_attrs:
+            result += "\nUser-modified attributes: " + ", ".join(changed_attrs)
+        
+        return result
+
     def fit(self, X):
+        """Fit the MDS model to the input data, without returning the 
+        transformed positions. 
+
+        Parameters
+        ----------
+        X : np.array of shape (n_samples, n_features) or (n_samples, n_samples)
+            The input data. If `input_type` is 'vector', X should be the feature 
+            vectors of the samples. If `input_type` is 'distance', X should be 
+            a pairwise distance matrix.
+
+        Returns
+        -------
+        self : object
+            The instance of the MDS class, after fitting the model to the input data.
+        """
         self.fit_transform(X)
         return self
 
     def fit_transform(self, X):
-        
+        """Fit the MDS model to the input data and return transformed positions. 
+
+        Dependning on 'input_type', the input data is either interpreted as a distance matrix or feature vectors.
+        The method uses gradient descent to optimize the lower-dimensional positions such that a Stress function, 
+        measuring the discrepancy between the input distances and resulting configuration, is minimized.
+
+        Parameters
+        ----------
+        X : np.array of shape (n_samples, n_features) or (n_samples, n_samples)
+            The input data. If `input_type` is 'vector', X should be the feature 
+            vectors of the samples. If `input_type` is 'distance', X should be 
+            a pairwise distance matrix.
+
+        Returns
+        -------
+        np.array of shape (n_samples, n_dims)
+            The transformed positions in the lower-dimensional space.
+
+        Raises
+        ------
+        ValueError
+            If `input_type` is neither 'distance' nor 'vector', a ValueError is raised.
+        """
         if self.input_type == 'distance':
             D = X
         elif self.input_type == 'vector':
@@ -109,34 +177,80 @@ class MDS():
 def _normalized_stress_function(
     positions, disparities, mds_type = None, compute_error = True, 
     compute_grad = True):
-    """Compute normalized stress as a measure of goodness-of-fit between 
-    input distances and the distances among the estimated positions.
+    """Compute normalized stress and its gradient. 
+
+    The stress function quantifies the goodness-of-fit between the input 
+    disparities (or distances) and the Euclidean distances in the low-dimensional 
+    space, with options for different MDS types: absolute, ratio, interval, and 
+    ordinal scaling. The input distances are transformed to disparities according to the mds type. 
+    Optionally, the function also computes the gradient to be used in optimization.
 
     Parameters
     ----------
     positions : np.array of shape (n_samples, n_dims)
-        estimated positions
+        The estimated positions in the low-dimensional space.
     disparities : np.array of shape (n_samples, n_samples)
-        input distances (or transform disparities)
-    inclusions : np.array of shape (n_samples), optional
-        array of 0/1 entries indicating if an object should be included
-        in the estimation, by default None
+        The input distances or disparities matrix, depending on the MDS type.
+    mds_type : str, optional
+        The type of MDS scaling to use: 'absolute', 'ratio', 'interval', 
+        or 'ordinal'. If None, 'absolute' scaling is used by default.
     compute_error : bool, optional
-        indicates if cost funciton value should be computed, by default True
+        Whether to compute the normalized stress value, by default True.
     compute_grad : bool, optional
-        indicates if gradient should be computed, by default True
+        Whether to compute the gradient of the stress function, by default True.
 
     Returns
     -------
-    float, array of shape (n_samples, n_dims)
-        cost function value and gradient
-    """
+    float or None
+        The computed stress value, or None if `compute_error` is False.
+    np.array of shape (n_samples, n_dims) or None
+        The computed gradient of the stress function, or None if `compute_grad` is False.
 
+    Raises
+    ------
+    ValueError
+        If an invalid `mds_type` is provided, or if `mds_type` is not recognized.
+    """
     def normalize_dhat(d_hat, n_samples):
+        """Normalize the flattened disparities to match the total variance of the data.
+
+        This method scales the input disparities so that their total sum of 
+        squares matches the total number of unique pairwise distances. The 
+        normalization ensures that the disparities are comparable to the distances.
+
+        Parameters
+        ----------
+        d_hat : np.array of shape (n_samples * (n_samples - 1) / 2)
+            The flattened array of pairwise disparities.
+        n_samples : int
+            The number of samples or points in the dataset.
+
+        Returns
+        -------
+        np.array of shape (n_samples * (n_samples - 1) / 2)
+            The normalized disparities.
+        """
         return d_hat * np.sqrt((n_samples * (n_samples - 1) / 2) / (d_hat**2).sum())
 
     def rebuild_matrix(disp_flat, n_samples):
-        # Take a 1d array of lower triangular entries and rebuild full symmetric matrix
+        """Rebuild a full symmetric matrix from a flattened array of lower triangular entries.
+
+        Given a 1D array containing the lower triangular elements of a matrix, 
+        this method reconstructs the full symmetric matrix where the upper triangular part mirrors 
+        the lower triangular part.
+
+        Parameters
+        ----------
+        disp_flat : np.array of shape (n_samples * (n_samples - 1) / 2)
+            The flattened array of lower triangular matrix entries (disparities).
+        n_samples : int
+            The number of samples or points, which determines the size of the matrix.
+
+        Returns
+        -------
+        np.array of shape (n_samples, n_samples)
+            The symmetric matrix reconstructed from the lower triangular entries.
+        """
         D_hat = np.zeros((n_samples, n_samples))
         D_hat[np.tril_indices(n_samples,-1)] = disp_flat
         D_hat = D_hat + D_hat.transpose()
@@ -183,7 +297,6 @@ def _normalized_stress_function(
         disparities_flat = disparities[np.tril_indices(len(disparities),-1)]        
 
         disp_hat = ir.fit_transform(X = disparities_flat, y = distances_flat)
-        #TOOD: Rename disparities to dissimilarities, before fitting
         disp_hat = disp_hat.reshape(-1)
         disp_hat = normalize_dhat(disp_hat, n_samples)
 
@@ -211,22 +324,23 @@ def _normalized_stress_function(
 @jit(nopython=True)
 def _normalized_stress_gradient(
     positions, distances, disparities):
-    """Calculate gradient of normalized stress function.
+    """Calculate the gradient of the normalized stress function for MDS.
 
     Parameters
     ----------
     positions : np.array of shape (n_samples, n_dims)
-        estimated postiions
+        The estimated positions in the low-dimensional space.
     distances : np.array of shape (n_samples, n_samples)
-        euclidean distances among estimated positions
+        The Euclidean distances among the estimated positions.
     disparities : np.array of shape (n_samples, n_samples)
-        input distance (or disparity) matrix
+        The input disparities (or distance) matrix.
 
     Returns
     -------
     np.array of shape (n_samples, n_dims)
-        gradient
+        The gradient of the stress function with respect to the positions.
     """
+
     n_samples = distances.shape[0]
     n_dims = positions.shape[1]
     gradient = np.zeros(shape = (n_samples, n_dims))

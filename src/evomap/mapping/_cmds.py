@@ -13,28 +13,39 @@ class CMDS():
 
     def __init__(self, n_dims = 2):
         self.n_dims = 2
-    
+
+    def __str__(self):
+        """Create a string representation of the CMDS instance."""
+        result = f"CMDS(n_dims={self.n_dims})"
+        return result
+
     @staticmethod
     def _cmdscale(D, n_dims, eps=1e-16):
-        """                                                                                       
-        Classical multidimensional scaling (MDS)                                                  
-                                                                                                
-        Parameters                                                                                
-        ----------                                                                                
-        D : (n, n) array                                                                          
-            Symmetric distance matrix.                                                            
-                                                                                                
-        Returns                                                                                   
-        -------                                                                                   
-        Y : (n, p) array                                                                          
-            Configuration matrix. Each column represents a dimension. Only the                    
-            p dimensions corresponding to positive eigenvalues of B are returned.                 
-            Note that each dimension is only determined up to an overall sign,                    
-            corresponding to a reflection.                                                        
-                                                                                                
-        e : (n,) array                                                                            
-            Eigenvalues of B.                                                                     
-                                                                                                
+        """Perform classical multidimensional scaling (CMDS) on the input distance matrix.
+
+        CMDS reduces the dimensionality of a distance matrix while
+        preserving the pairwise distances as well as possible using eigenvalue decomposition.
+
+        Parameters
+        ----------
+        D : np.array of shape (n, n)
+            Symmetric distance matrix to be scaled.
+        n_dims : int
+            Number of dimensions to which the data should be reduced.
+        eps : float, optional, default=1e-16
+            Tolerance for numerical precision in rounding the resulting coordinates.
+
+        Returns
+        -------
+        Y : np.array of shape (n, n_dims)
+            Configuration matrix with the reduced dimensionality representation of the points.
+        e : np.array of shape (n,)
+            The eigenvalues corresponding to the dimensions.
+
+        Raises
+        ------
+        ValueError
+            If the input matrix `D` is not square or symmetric.
         """
         # Number of points                                                                        
         n = len(D)
@@ -72,9 +83,33 @@ class CMDS():
         return np.round(Y, -int(np.log10(eps))), positive_evals
 
     def fit(self, X):
+        """Fit the CMDS model to the provided distance matrix.
+
+        Parameters
+        ----------
+        X : np.array of shape (n, n)
+            Symmetric distance matrix to be scaled.
+
+        Returns
+        -------
+        self : object
+            Returns the instance itself with the configuration matrix `Y_` stored as an attribute.
+        """
         self.Y_, _ = self._cmdscale(X, self.n_dims)
         return self
 
     def fit_transform(self, X):
+        """Fit the CMDS model to the distance matrix and return the transformed coordinates.
+
+        Parameters
+        ----------
+        X : np.array of shape (n, n)
+            Symmetric distance matrix to be scaled.
+
+        Returns
+        -------
+        np.array of shape (n, n_dims)
+            The transformed coordinates (configuration matrix) in the reduced dimensional space.
+        """
         self.fit(X)
         return self.Y_

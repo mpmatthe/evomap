@@ -3,11 +3,11 @@ T-Distributed Stochastic Neighborhood Embedding, as propsoed in:
 
 Van der Maaten, L., & Hinton, G. (2008). Visualizing data using t-SNE. Journal of machine learning research, 9(11).
 """
-
 import numpy as np
 from scipy.spatial.distance import cdist
 from numba import jit
 from ._optim import gradient_descent_with_momentum
+import inspect
 
 EPSILON = 1e-12
 
@@ -51,17 +51,71 @@ class TSNE():
         self.step_size = step_size
         self.method_str = "TSNE"
 
+    def __str__(self):
+        """Return a string representation of the TSNE instance with key parameters and user-modified values."""
+        # Get the signature of the __init__ method
+        signature = inspect.signature(self.__init__)
+        
+        # Get the default values of the parameters from the __init__ method
+        defaults = {k: v.default for k, v in signature.parameters.items() if v.default is not inspect.Parameter.empty}
+        
+        # Always show key parameters
+        result = f"TSNE(perplexity={self.perplexity}, input_type={self.input_type})"
+        
+        # Collect all attributes that differ from the default
+        changed_attrs = []
+        for attr, default_val in defaults.items():
+            current_val = getattr(self, attr)
+            if current_val != default_val:
+                changed_attrs.append(f"{attr}={current_val}")
+        
+        # If any attributes were changed, append them to the result
+        if changed_attrs:
+            result += "\nUser-modified attributes: " + ", ".join(changed_attrs)
+        
+        return result
+
+
     def fit(self, X):
+        """Fit the TSNE model to the input data, without returning the transformed coordinates.
+
+        Parameters
+        ----------
+        X : np.array of shape (n_samples, n_features) or (n_samples, n_samples)
+            The input data. If `input_type` is 'vector', `X` should be the feature 
+            vectors of the samples. If `input_type` is 'distance', `X` should be 
+            the pairwise distance matrix.
+
+        Returns
+        -------
+        self : object
+            Returns the instance of the TSNE class with the configuration matrix 
+            `Y_` stored as an attribute.
+        """
         self.fit_transform(X)
         return self
 
     def fit_transform(self, X):
+        """Fit the TSNE model and return the transformed coordinates.
+
+        Parameters
+        ----------
+        X : np.array of shape (n_samples, n_features) or (n_samples, n_samples)
+            The input data. If `input_type` is 'vector', `X` should be the feature 
+            vectors of the samples. If `input_type` is 'distance', `X` should be 
+            the pairwise distance matrix.
+
+        Returns
+        -------
+        np.array of shape (n_samples, n_dims)
+            The transformed coordinates in the reduced-dimensional space.
         
+        Raises
+        ------
+        ValueError
+            If the `input_type` is not 'distance' or 'vector'.
+        """
         if self.input_type == 'distance':
-            # Note: When using sammon with pre-computed distances, note that
-            # optimzation can sometimes be tricky (gradient norm increases 
-            # inverse proportionally to distance size. Thus, very small distances
-            # can let the gradient explode). 
             D = X
         elif self.input_type == 'vector':
             D = cdist(X,X)
@@ -112,12 +166,45 @@ class TSNE():
 
         self.Y_ = Y
         self.cost_ = cost
-        best_cost = cost
 
         return self.Y_
         
 def _calc_p_matrix(X, included, input_type, perplexity):
+    """Calculate the probability matrix (P-matrix) for t-SNE.
 
+    The P-matrix is a joint probability distribution over pairwise similarities. 
+    Depending on the input type, this function calculates the matrix from either 
+    feature vectors, distance matrices, or similarity matrices. It also handles 
+    cases where certain rows are excluded from the calculation.
+
+    Parameters
+    ----------
+    X : ndarray of shape (n_samples, n_features) or (n_samples, n_samples)
+        The input data, which can either be feature vectors (if `input_type` is 'vector'),
+        a distance matrix (if `input_type` is 'distance'), or a similarity matrix 
+        (if `input_type` is 'similarity').
+    included : ndarray of shape (n_samples,), optional
+        A binary array (0/1) indicating whether each sample should be included in the 
+        P-matrix calculation. If None, all samples are included by default.
+    input_type : str
+        Specifies the type of input. Should be one of {'vector', 'distance', 'similarity'}.
+    perplexity : float
+        The desired perplexity, used for tuning the distribution of the P-matrix. 
+        Perplexity determines the effective number of neighbors for each point.
+
+    Returns
+    -------
+    P : ndarray of shape (n_samples, n_samples)
+        The joint probability distribution matrix over pairwise similarities.
+    
+    Raises
+    ------
+    AssertionError
+        If any rows of the input matrix contain only zeros, which would indicate 
+        invalid data for the calculation.
+    ValueError
+        If the input type is not recognized or if the P-matrix contains invalid values.
+    """
     from evomap.mapping.evomap import _utils # Import here to avoid circular dependency when initializing the module
     n = X.shape[0]
     if included is None:
@@ -163,17 +250,28 @@ def _calc_p_matrix(X, included, input_type, perplexity):
     return P        
 
 def _check_prepare_tsne(model, X):
-    """ Check and, if necessary, prepare data for t-SNE.
+    """Check and prepare the input data for t-SNE.
+
+    This function validates and prepares the input data for t-SNE by calculating the 
+    appropriate learning rate (`eta`) and generating the P-matrix based on the input data.
 
     Parameters
     ----------
-    model: TSNE or EvoMap
-        Model object.
+    model : TSNE or EvoMap
+        The t-SNE or EvoMap model instance. The function will check and set the 
+        learning rate (`eta`) and other parameters from this model.
+    X : ndarray of shape (n_samples, n_features) or (n_samples, n_samples)
+        The input data, which can be feature vectors or a distance matrix.
 
     Returns
+    -------
+    P : ndarray of shape (n_samples, n_samples)
+        The prepared P-matrix representing pairwise similarities.
+
+    Raises
     ------
-    ndarray of shape (n_samples, n_samples)
-        Prepared input data
+    ValueError
+        If the learning rate (`eta`) is invalid.
     """
     n_samples = X.shape[0]
     if model.eta == "auto":
@@ -187,6 +285,18 @@ def _check_prepare_tsne(model, X):
 
 @jit(nopython=True)
 def sqeuclidean_dist(Y):
+    """Calculate the pairwise squared Euclidean distance matrix.
+
+    Parameters
+    ----------
+    Y : np.ndarray of shape (n_samples, n_dims)
+        The coordinates of the points in the low-dimensional space.
+
+    Returns
+    -------
+    D : np.ndarray of shape (n_samples, n_samples)
+        The squared Euclidean distance matrix.
+    """
     n = Y.shape[0]
     d = Y.shape[1]
 
@@ -200,15 +310,28 @@ def sqeuclidean_dist(Y):
 
 @jit(nopython=True)
 def calc_q_matrix(Y, inclusions):
-    """Calculate Q-Matrix of joint probabilities in low-dim space.
-    
-    Arguments:
-        Y {np.ndarray} -- (n,2) array of map coordinates
-        exclusions {np.ndarray} -- condensed-dist-mat indices for exclusions
+    """Calculate the Q-matrix of joint probabilities in low-dimensional space.
 
-    Returns:
-        Q {np.ndarray} -- (n,n) array of joint probabilities in low-dim space.
-        dist {np.ndarray} -- (n,n) array of squared euclidean distances
+    The Q-matrix represents the joint probabilities in the low-dimensional 
+    space based on the pairwise Euclidean distances between points. A small 
+    constant is added to avoid division by zero. The method also allows 
+    excluding certain points from the calculation.
+
+    Parameters
+    ----------
+    Y : np.ndarray of shape (n_samples, n_dims)
+        Array of map coordinates in the low-dimensional space.
+    inclusions : np.ndarray of shape (n_samples,), optional
+        A binary array where 1 indicates the point is included and 0 indicates 
+        the point is excluded from the probability matrix. If None, all points 
+        are included by default.
+
+    Returns
+    -------
+    Q : np.ndarray of shape (n_samples, n_samples)
+        The joint probability matrix in the low-dimensional space.
+    dist : np.ndarray of shape (n_samples, n_samples)
+        The squared Euclidean distance matrix used to compute Q.
     """
     n = Y.shape[0]
     if inclusions is None:
@@ -230,7 +353,31 @@ def calc_q_matrix(Y, inclusions):
     return Q, dist
 
 def _kl_divergence(Y, P, compute_error = True, compute_grad = True):
+    """Calculate the KL-divergence between high-dimensional and low-dimensional joint probabilities.
 
+    This function computes the Kullback-Leibler (KL) divergence between the 
+    joint probability distribution in the high-dimensional space (P) and 
+    the low-dimensional space (Q). Optionally, it also computes the gradient 
+    of the KL-divergence with respect to the low-dimensional coordinates.
+
+    Parameters
+    ----------
+    Y : np.ndarray of shape (n_samples, n_dims)
+        Array of map coordinates in the low-dimensional space.
+    P : np.ndarray of shape (n_samples, n_samples)
+        The joint probability matrix in the high-dimensional space.
+    compute_error : bool, optional
+        Whether to compute the KL-divergence value, by default True.
+    compute_grad : bool, optional
+        Whether to compute the gradient of the KL-divergence, by default True.
+
+    Returns
+    -------
+    error : float or None
+        The KL-divergence value, or None if `compute_error` is False.
+    grad : np.ndarray or None
+        The gradient of the KL-divergence, or None if `compute_grad` is False.
+    """
     Q, dist = calc_q_matrix(Y, None)
 
     if compute_error:
@@ -251,16 +398,23 @@ def _kl_divergence(Y, P, compute_error = True, compute_grad = True):
 
 @jit(nopython=True)
 def _kl_divergence_grad(Y, P, Q, dist):
-    """ Calculate gradient of KL-divergence dC/dY.
-    
-    Arguments:
-        Y {np.ndarray} -- (n,2) array of map coordinates
-        P {np.ndarray} -- condensed-matrix of joint probabilities (high dim)
-        Q {np.ndarray} -- condensed-matrix of joint probabilities (low dim)
-        dist {np.ndarray} -- condensed-matrix of sq.euclidean distances
-    
-    Returns:
-        dY {np.ndarray} -- (n,2) array of gradient values
+    """Calculate the gradient of the KL-divergence with respect to the low-dimensional coordinates.
+
+    Parameters
+    ----------
+    Y : np.ndarray of shape (n_samples, n_dims)
+        Array of map coordinates in the low-dimensional space.
+    P : np.ndarray of shape (n_samples, n_samples)
+        The joint probability matrix in the high-dimensional space.
+    Q : np.ndarray of shape (n_samples, n_samples)
+        The joint probability matrix in the low-dimensional space.
+    dist : np.ndarray of shape (n_samples, n_samples)
+        The squared Euclidean distance matrix in the low-dimensional space.
+
+    Returns
+    -------
+    dY : np.ndarray of shape (n_samples, n_dims)
+        The gradient of the KL-divergence with respect to the map coordinates.
     """
     # Gradient: dC/dY
     (n_samples, n_dims) = Y.shape
@@ -276,12 +430,23 @@ def _kl_divergence_grad(Y, P, Q, dist):
 
 @jit(nopython=True)
 def cond_to_joint(P):
-    """ Take an asymmetric conditional probability matrix and convert it to a 
-    symmetric joint probability matrix.
+    """Convert a conditional probability matrix to a symmetric joint probability matrix.
 
-    Symmetrizes and normalizes the matrix. 
-    """ 
-    np.fill_diagonal(P,0)                  # Set diagonal to zero
+    This function takes an asymmetric conditional probability matrix (P) and 
+    converts it into a symmetric joint probability matrix by averaging the 
+    pairwise probabilities and normalizing the result.
+
+    Parameters
+    ----------
+    P : np.ndarray of shape (n_samples, n_samples)
+        The conditional probability matrix.
+
+    Returns
+    -------
+    P : np.ndarray of shape (n_samples, n_samples)
+        The symmetric joint probability matrix.
+    """
+    np.fill_diagonal(P,0)
     P = P + P.T
     sum_P = np.maximum(np.sum(P), EPSILON)
     P = np.maximum(P / sum_P, EPSILON)

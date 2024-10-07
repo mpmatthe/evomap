@@ -8,6 +8,9 @@ from numba import jit
 from ._core import EvoMap
 from ._core import _evomap_cost_function, _get_positions_for_period
 from evomap.mapping._optim import DivergingGradientError
+import inspect
+from evomap.mapping._optim import gradient_descent_with_momentum
+from evomap.mapping._tsne import _kl_divergence, _check_prepare_tsne
 
 class EvoTSNE(EvoMap):
 
@@ -52,14 +55,72 @@ class EvoTSNE(EvoMap):
         self.max_tries = max_tries
         self.method_str = "EvoTSNE"
 
+    def __str__(self):
+        """Return a string representation of the EvoTSNE instance with alpha, p, perplexity, and user-modified parameters."""
+        # Get the signature of the __init__ method
+        signature = inspect.signature(self.__init__)
+        
+        # Get the default values of the parameters from the __init__ method
+        defaults = {k: v.default for k, v in signature.parameters.items() if v.default is not inspect.Parameter.empty}
+        
+        # Always show key parameters
+        result = f"EvoTSNE(alpha={self.alpha}, p={self.p}, perplexity={self.perplexity})"
+        
+        # Collect all attributes that differ from the default
+        modified_params = []
+        for attr, default_val in defaults.items():
+            current_value = getattr(self, attr)
+            if current_value != default_val and attr not in ["alpha", "p", "perplexity"]:
+                modified_params.append(f"{attr}={current_value}")
+        
+        # If any attributes were changed, append them to the result
+        if modified_params:
+            result += "\nUser-modified attributes: " + ", ".join(modified_params)
+        
+        return result
+
     def fit(self, Xs):
+        """Fit EvoTSNE to the input data over multiple periods.
+
+        Parameters
+        ----------
+        Xs : list of np.ndarray
+            A list of input matrices, where each matrix corresponds to one period. 
+            The input matrices can either be feature vectors or distance matrices, 
+            depending on the `input_type`.
+
+        Returns
+        -------
+        self : object
+            Returns the instance of the EvoTSNE class with the configuration matrix 
+            `Ys_` stored as an attribute.
+        """        
         self.fit_transform(Xs)
         return self
 
-    def fit_transform(self, Xs, inclusions = None):
-        from evomap.mapping._optim import gradient_descent_with_momentum
-        from evomap.mapping._tsne import _kl_divergence, _check_prepare_tsne
+    def fit_transform(self, Xs, inclusions=None):
+        """Fit EvoTSNE and return the transformed coordinates.
 
+        Parameters
+        ----------
+        Xs : list of np.ndarray
+            A list of input matrices, where each matrix corresponds to one period. 
+            The input matrices can either be feature vectors or distance matrices, 
+            depending on the `input_type`.
+        inclusions : np.ndarray, optional
+            Binary array indicating which points are included in the calculation, 
+            by default None.
+
+        Returns
+        -------
+        list of np.ndarray
+            The transformed coordinates for each period, stored as a list of matrices.
+        
+        Raises
+        ------
+        ValueError
+            If the `input_type` is not 'distance' or 'vector'.
+        """
         super()._validate_input(Xs, inclusions)
                 
         # Check and prepare input data

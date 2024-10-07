@@ -7,12 +7,10 @@ import numpy as np
 import pandas as pd
 import matplotlib as mpl
 from matplotlib import pyplot as plt
-from matplotlib.colors import ListedColormap
 from matplotlib.ticker import FuncFormatter
 from scipy.spatial.distance import cdist
 import numpy as np
 import pandas as pd
-from scipy.spatial.distance import cdist
 from scipy.stats import spearmanr
 from evomap.mapping._regression import IsotonicRegression
 import matplotlib.pyplot as plt
