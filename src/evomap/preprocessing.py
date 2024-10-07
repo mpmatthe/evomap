@@ -298,7 +298,6 @@ def normalize_diss_mats(D_ts):
 
     return normalized_mats
 
-
 def expand_matrices(X_ts, labels_ts):
     """
     Expand a list of similarity matrices (X_ts) to equal shape and calculate inclusion vectors.
@@ -320,7 +319,8 @@ def expand_matrices(X_ts, labels_ts):
     inclusion_vectors = []
 
     for X, labels in zip(X_ts, labels_ts):
-        full_matrix = pd.DataFrame(0, index=all_labels, columns=all_labels)
+        # Initialize full_matrix with floating-point zeros to avoid dtype conflicts
+        full_matrix = pd.DataFrame(0.0, index=all_labels, columns=all_labels)
         matrix_df = pd.DataFrame(X, index=labels, columns=labels)
         full_matrix.update(matrix_df)
         inclusion_vector = np.array([int(label in labels) for label in all_labels])

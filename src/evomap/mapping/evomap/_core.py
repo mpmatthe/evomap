@@ -82,6 +82,7 @@ class EvoMap():
         if self.init is None:
             init_t = np.zeros((0, self.n_dims))
             for t in range(n_periods):
+                np.random.seed(0)
                 init = np.random.normal(0,.1,(n_samples, self.n_dims))
                 init_t = np.concatenate([init_t, init], axis = 0)
 

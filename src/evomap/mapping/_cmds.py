@@ -15,7 +15,7 @@ class CMDS():
         self.n_dims = 2
     
     @staticmethod
-    def _cmdscale(D, n_dims):
+    def _cmdscale(D, n_dims, eps=1e-16):
         """                                                                                       
         Classical multidimensional scaling (MDS)                                                  
                                                                                                 
@@ -52,14 +52,24 @@ class CMDS():
         idx   = np.argsort(evals)[::-1]
         evals = evals[idx]
         evecs = evecs[:,idx]
+
+        # Enforce consistent sign for each eigenvector
+        for i in range(n_dims):
+            # Find the index of the component with the largest absolute value
+            max_idx = np.argmax(np.abs(evecs[:, i]))
+            # If the component is negative, flip the eigenvector
+            if evecs[max_idx, i] < 0:
+                evecs[:, i] *= -1
+
+        # Select positive eigenvalues and corresponding eigenvectors
+        positive_evals = evals[:n_dims]
+        positive_evecs = evecs[:, :n_dims]
     
-        # Compute the coordinates using positive-eigenvalued components only                      
-        w, = np.where(evals > 0)
-        L  = np.diag(np.sqrt(evals[w]))
-        V  = evecs[:,w]
-        Y  = V.dot(L)
+        # Compute the coordinates using positive-eigenvalued components only
+        L = np.diag(np.sqrt(positive_evals))
+        Y = positive_evecs.dot(L)
     
-        return Y[:, :n_dims], evals[evals > 0]
+        return np.round(Y, -int(np.log10(eps))), positive_evals
 
     def fit(self, X):
         self.Y_, _ = self._cmdscale(X, self.n_dims)

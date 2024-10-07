@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 from scipy.spatial.distance import cdist
 from scipy.stats import spearmanr
-from sklearn.isotonic import IsotonicRegression
+from evomap.mapping._regression import IsotonicRegression
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 from cycler import cycler

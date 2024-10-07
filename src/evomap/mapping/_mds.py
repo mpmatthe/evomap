@@ -7,6 +7,8 @@ from numba import jit
 from ._optim import gradient_descent_line_search
 from ._cmds import CMDS
 import statsmodels.api as sm
+from sklearn.linear_model import LinearRegression
+from ._regression import IsotonicRegression
 
 EPSILON = 1e-10
 
@@ -68,6 +70,7 @@ class MDS():
                     print("[{0}] Initialization {1}/{2}".format(self.method_str,i+1, self.n_inits))
 
             if self.init is None:
+                np.random.seed(0)
                 init = np.random.normal(0,.1,(n_samples, n_dims))
             elif type(self.init) == str and self.init == "cmds":
                 init = CMDS().fit_transform(D)
@@ -95,10 +98,13 @@ class MDS():
                 self.cost_ = cost
                 best_cost = cost
 
-        return self.Y_
+        # Enforce consistent signs of coordinates
+        for dim in range(n_dims):
+            # Check the sign of the first element in the dimension
+            if self.Y_[0, dim] > 0:
+                self.Y_[:, dim] *= -1
 
-from sklearn.isotonic import IsotonicRegression
-from sklearn.linear_model import LinearRegression
+        return self.Y_
 
 def _normalized_stress_function(
     positions, disparities, mds_type = None, compute_error = True, 
@@ -183,6 +189,7 @@ def _normalized_stress_function(
 
         # Rebuild matrix of (fitted) disparities
         disp_hat = rebuild_matrix(disp_hat, n_samples)
+
     else:
         raise ValueError("Unknown MDS type {0}!".format(mds_type))
     
