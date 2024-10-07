@@ -44,15 +44,15 @@ setup(
         'evomap.data': ['*.csv', '*.xlsx', '*.npy', '__init__.py'],
     },
     install_requires=[
-        'matplotlib',
         'cycler',
+        'matplotlib',
         'numba',
         'numpy',
         'pandas',
+        'scikit-learn',
         'scipy',
         'seaborn',
         'statsmodels',
-        'scikit-learn',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
