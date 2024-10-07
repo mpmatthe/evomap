@@ -37,8 +37,8 @@ For a simple introduction to a typical market structure application, see <a href
 
 If you want to explore more of what evomap has to offer, check out the following examples on:
 
-<a href='https://evomap.readthedocs.io/en/latest/static%20mapping.html'>Static Mapping</a>
-<a href='https://evomap.readthedocs.io/en/latest/dynamic%20mapping.html'>Dynamic Mapping</a>
+- <a href='https://evomap.readthedocs.io/en/latest/static%20mapping.html'>Static Mapping</a>
+- <a href='https://evomap.readthedocs.io/en/latest/dynamic%20mapping.html'>Dynamic Mapping</a>
 
 ## Mapping Methods
 
