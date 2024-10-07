@@ -64,5 +64,5 @@ setup(
         'Programming Language :: Python :: 3.11',
     ],
     python_requires='>=3.9',
-    keywords='mapping, data analysis, network analysis, evolving data relationships',
+    keywords='mapping, data analysis, network analysis, evolving relationship data, temporal networks',
 )
