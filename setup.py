@@ -51,6 +51,7 @@ setup(
         'scipy',
         'seaborn',
         'statsmodels',
+        'scikit-learn',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
