@@ -22,10 +22,10 @@ import statsmodels.api as sm
 DEFAULT_BUBBLE_SIZE = 50
 DEFAULT_FONT_SIZE = 12
 
-title_fontdict_large = {'size': 20, 'family': 'Arial'}
-title_fontdict = {'size': 18, 'family': 'Arial'}
-text_fontdict = {'size': DEFAULT_FONT_SIZE, 'family': 'Arial'}
-axis_label_fontdict = {'size': 12, 'family': 'Arial'}
+title_fontdict_large = {'size': 20, 'family': 'sans-serif'}
+title_fontdict = {'size': 18, 'family': 'sans-serif'}
+text_fontdict = {'size': DEFAULT_FONT_SIZE, 'family': 'sans-serif'}
+axis_label_fontdict = {'size': 12, 'family': 'sans-serif'}
 
 def format_tick_labels(x, pos):
     return '{0:.2f}'.format(x)
@@ -41,7 +41,7 @@ def init_params(custom_params=None):
         "axes.linewidth": 1,
         "axes.titlesize": 22,
         "axes.labelsize": 16,
-        "font.family": 'Arial',
+        "font.family": 'sans-serif',
         "axes.edgecolor": "black",
         "xtick.labelsize": 12,
         "ytick.labelsize": 12,
