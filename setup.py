@@ -45,6 +45,7 @@ setup(
     },
     install_requires=[
         'matplotlib',
+        'cycler',
         'numba',
         'numpy',
         'pandas',
