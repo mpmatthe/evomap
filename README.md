@@ -15,7 +15,7 @@ For any bug reports or feature requests, <a href = 'mailto:mpmatthe@iu.edu'>plea
 
 ## Installation
 
-`evomap` is available via PyPi. 
+`evomap` is available via <a href='https://pypi.org/project/evomap/'>PyPi</a>. 
 
 To install `evomap` run
 ```bash
