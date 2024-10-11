@@ -145,7 +145,6 @@ class EvoMDS(EvoMap):
                     print("[{0}] Initialization {1}/{2}".format(self.method_str,i+1, self.n_inits))
                 
             init = super()._initialize(Xs)
-
             # Set gradient descent arguments
             opt_args = {
                 'init': init,

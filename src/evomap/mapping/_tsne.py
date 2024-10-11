@@ -133,7 +133,6 @@ class TSNE():
 
         # Initialize
         if self.init is None:
-            np.random.seed(0)
             init = np.random.normal(0,1,(n_samples, n_dims))
         else:
             init = self.init
