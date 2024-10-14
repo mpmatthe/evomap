@@ -20,7 +20,7 @@ class CMDS():
         return result
 
     @staticmethod
-    def _cmdscale(D, n_dims, eps=1e-12):
+    def _cmdscale(D, n_dims, eps=1e-10):
         """Perform classical multidimensional scaling (CMDS) on the input distance matrix.
 
         CMDS reduces the dimensionality of a distance matrix while
