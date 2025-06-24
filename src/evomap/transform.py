@@ -27,7 +27,8 @@ def align_maps(Xs, X_ref):
         if X.shape[1] != X_ref.shape[1]:
             raise ValueError("All maps must have the same number of dimensions as the reference map.")
 
-    return [align_map(X, X_ref) for X in Xs]
+    R, _ = orthogonal_procrustes(Xs[0], X_ref)
+    return [X @ R for X in Xs]
 
 def align_map(X, X_ref):
     """
