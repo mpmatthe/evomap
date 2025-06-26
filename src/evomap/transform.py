@@ -5,30 +5,40 @@ Module for transforming lower-dimensional maps post-creation, including alignmen
 from scipy.linalg import orthogonal_procrustes
 import numpy as np
 
-def align_maps(Xs, X_ref):
+def align_maps(Xs, X_ref, mode="individual"):
     """
     Align a sequence of maps to a reference map using Orthogonal Procrustes Analysis.
 
     Parameters
     ----------
     Xs : list of ndarray
-        List of map coordinates, each of shape (n_samples, n_dims)
+        List of map coordinates, each of shape (n_samples, n_dims).
     X_ref : ndarray
-        Reference map, shape (n_samples, n_dims)
+        Reference map, shape (n_samples, n_dims).
+    mode : str, optional (default="individual")
+        Alignment mode:
+        - "individual": Align each map independently to the reference.
+        - "fixed": Align the first map to the reference and apply the same rotation to all.
 
     Returns
     -------
     list of ndarray
-        List of aligned map coordinates, each of shape (n_samples, n_dims)
+        List of aligned maps.
     """
     if not Xs or X_ref.size == 0:
         raise ValueError("Input maps and reference map must not be empty.")
-    for X in Xs:
-        if X.shape[1] != X_ref.shape[1]:
-            raise ValueError("All maps must have the same number of dimensions as the reference map.")
+    if any(X.shape[1] != X_ref.shape[1] for X in Xs):
+        raise ValueError("All maps must have the same number of dimensions as the reference map.")
 
-    R, _ = orthogonal_procrustes(Xs[0], X_ref)
-    return [X @ R for X in Xs]
+    if mode == "individual":
+        return [align_map(X, X_ref) for X in Xs]
+
+    elif mode == "fixed":
+        R, _ = orthogonal_procrustes(Xs[0], X_ref)
+        return [X @ R for X in Xs]
+
+    else:
+        raise ValueError("Invalid mode. Choose either 'individual' or 'fixed'.")
 
 def align_map(X, X_ref):
     """
