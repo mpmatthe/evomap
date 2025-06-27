@@ -46,11 +46,11 @@ setup(
     install_requires=[
         'cycler',
         'matplotlib',
+        'scipy<=1.15.3',
         'numba',
         'numpy',
         'pandas',
         'scikit-learn',
-        'scipy',
         'seaborn',
         'statsmodels',
     ],
