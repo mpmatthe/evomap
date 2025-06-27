@@ -35,12 +35,19 @@ pip install evomap
 
 The following tutorials provide a good starting point for using `evomap`.
 
-For a simple introduction to a typical market structure application, see <a href='https://evomap.readthedocs.io/en/latest/car%20application.html'>this example</a>.
+For a simple introduction to a typical market structure application, see  
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mpmatthe/evomap/blob/main/docs/car%20applications.ipynb)
 
-If you want to explore more of what evomap has to offer, check out the following examples on:
+If you want to explore more of what `evomap` has to offer, check out the following examples:
 
-- <a href='https://evomap.readthedocs.io/en/latest/static%20mapping.html'>Static Mapping</a>
-- <a href='https://evomap.readthedocs.io/en/latest/dynamic%20mapping.html'>Dynamic Mapping</a>
+- **Static Mapping**  
+  [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mpmatthe/evomap/blob/main/docs/static_mapping.ipynb)
+
+- **Dynamic Mapping**  
+  [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mpmatthe/evomap/blob/main/docs/dynamic_mapping.ipynb)
+
+A more detailed tutorial is available here:  
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mpmatthe/evomap/blob/main/tutorials/evomap_demo.ipynb)
 
 ## Mapping Methods
 
