@@ -36,7 +36,7 @@ pip install evomap
 The following tutorials provide a good starting point for using `evomap`.
 
 For a simple introduction to a typical market structure application, see  
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mpmatthe/evomap/blob/main/docs/car%20applications.ipynb)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mpmatthe/evomap/blob/main/docs/car_application.ipynb)
 
 If you want to explore more of what `evomap` has to offer, check out the following examples:
 
@@ -47,7 +47,7 @@ If you want to explore more of what `evomap` has to offer, check out the followi
   [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mpmatthe/evomap/blob/main/docs/dynamic_mapping.ipynb)
 
 A more detailed tutorial is available here:  
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mpmatthe/evomap/blob/main/tutorials/evomap_demo.ipynb)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mpmatthe/evomap/blob/main/docs/evomap_demo.ipynb)
 
 ## Mapping Methods
 
