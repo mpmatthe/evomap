@@ -51,6 +51,7 @@ setup(
         'numpy',
         'pandas',
         'scikit-learn',
+        'scikit-optimize',
         'seaborn',
         'statsmodels',
     ],

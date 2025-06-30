@@ -194,4 +194,8 @@ class EvoMDS(EvoMap):
                 self.cost_static_avg_ = self.cost_static_ / n_periods    
                 best_cost = cost
 
+        if not hasattr(self, "cost_static_avg_"):
+            self.cost_static_avg_ = np.inf
+            self.Ys_ = [np.zeros((Ds[0].shape[0], self.n_dims)) for _ in range(n_periods)]
+        
         return self.Ys_

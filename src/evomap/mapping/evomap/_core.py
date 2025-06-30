@@ -7,6 +7,8 @@ import pandas as pd
 import copy
 from itertools import product 
 from numba import jit
+from skopt import gp_minimize
+from skopt.space import Real, Integer
 
 class EvoMap():
     """ EvoMap Interface. Implements default functions shared by all  
@@ -272,6 +274,68 @@ class EvoMap():
         if model.verbose > 0:
                 print("[{0}] Grid Search Completed.".format(model.method_str))
 
+        return df_res
+    
+    def bayesian_search(
+        self, 
+        Xs, 
+        search_space, 
+        eval_functions=None, 
+        eval_labels=None, 
+        weights=None, 
+        inclusions=None,
+        opt_params=None
+    ):
+        self._validate_input(Xs, inclusions)
+        if weights is None:
+            weights = [1.0]
+        if eval_labels is None and eval_functions:
+            eval_labels = [f"Metric_{i+1}" for i in range(len(eval_functions))]
+        if opt_params is None:
+            opt_params = {}
+
+        results_log = []
+
+        def objective(params):
+            param_dict = {dim.name: val for dim, val in zip(search_space, params)}
+            alpha = param_dict.get("alpha", 0.0)
+            p = int(param_dict.get("p", 1))
+
+            model_i = copy.deepcopy(self)
+            model_i.set_params({'alpha': alpha, 'p': p, 'verbose': 0})
+            Y_all = model_i.fit_transform(Xs, inclusions)
+            L_static = model_i.cost_static_avg_
+            L_metrics = [fn(Y_all) for fn in eval_functions] if eval_functions else []
+
+            weighted_loss = weights[0] * L_static + sum(
+                w * m for w, m in zip(weights[1:], L_metrics)
+            )
+
+            entry = {'alpha': alpha, 'p': p, 'cost_static_avg': L_static}
+            for i, val in enumerate(L_metrics):
+                entry[eval_labels[i]] = val
+            entry['combined_loss'] = weighted_loss
+            results_log.append(entry)
+            return weighted_loss
+
+        res = gp_minimize(
+            func=objective,
+            dimensions=search_space,
+            **opt_params
+        )
+
+        df_res = pd.DataFrame(results_log)
+        df_res.sort_values("combined_loss", inplace=True)
+        df_res.reset_index(drop=True, inplace=True)
+
+        best_row = df_res.iloc[0]
+        print("Best result found:")
+        for col in df_res.columns:
+            val = best_row[col]
+            if isinstance(val, float):
+                print(f"{col}: {val:.4f}")
+            else:
+                print(f"{col}: {val}")
         return df_res
 
     def fit(self, Xs, inclusions = None):
