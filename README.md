@@ -17,8 +17,6 @@ For any bug reports or feature requests, <a href = 'mailto:mpmatthe@iu.edu'>plea
 
 `evomap` is available via <a href='https://pypi.org/project/evomap/'>PyPi</a>. 
 
-**Note**: Python 3.13 has just been released and may not yet be compatible with some of evomap's dependencies. We recommend using Python 3.12 or earlier.
-
 To install `evomap` run
 ```bash
 pip install evomap
