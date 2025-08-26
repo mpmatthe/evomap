@@ -12,7 +12,7 @@ import numpy as np
 class CMDS():
 
     def __init__(self, n_dims = 2):
-        self.n_dims = 2
+        self.n_dims = n_dims
 
     def __str__(self):
         """Create a string representation of the CMDS instance."""
